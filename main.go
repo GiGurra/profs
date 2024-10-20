@@ -78,8 +78,15 @@ func SetCmd(gc GlobalConfig) *cobra.Command {
 		ParamEnrich: boa.ParamEnricherDefault,
 		ValidArgs:   params.Profile.GetAlternatives(),
 		Run: func(cmd *cobra.Command, args []string) {
-			gc := LoadGlobalConf()
-			fmt.Println(fmt.Sprintf("Global config: %s", PrettyJson(gc)))
+			if !lo.Contains(gc.DetectedProfileNames(), params.Profile.Value()) {
+				fmt.Println(fmt.Sprintf("Profile not found: %v", params.Profile.Value()))
+				fmt.Println("Available profiles:")
+				for _, p := range gc.DetectedProfileNames() {
+					fmt.Println(fmt.Sprintf("  %v", p))
+				}
+				os.Exit(1)
+			}
+			fmt.Println()
 		},
 	}.ToCmd()
 }
