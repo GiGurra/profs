@@ -38,6 +38,34 @@ go install github.com/GiGurra/profs@latest
 
 ## Usage
 
+Bring up the help:
+
+```
+> profs --help
+Load user profile
+
+Usage:
+  profs [command]
+
+Available Commands:
+  completion  Generate the autocompletion script for the specified shell
+  help        Help about any command
+  set         Set current profile
+  status      Show current configuration
+  status-full Show full configuration and alternatives
+
+Flags:
+  -h, --help   help for profs
+
+Use "profs [command] --help" for more information about a command.
+```
+
+### Create auto completion scripts
+
+```
+profs completion fish|bash|zsh|...
+```
+
 ### Set Profile
 
 To set a profile:
