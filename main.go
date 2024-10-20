@@ -55,7 +55,7 @@ func StatusCmd(gc GlobalConfig) *cobra.Command {
 
 func FullStatusCmd(gc GlobalConfig) *cobra.Command {
 	return boa.Wrap{
-		Use:   "full-status",
+		Use:   "status-full",
 		Short: "Show full configuration and alternatives",
 		Run: func(cmd *cobra.Command, args []string) {
 			fmt.Println(PrettyJson(gc))
