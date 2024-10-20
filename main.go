@@ -24,6 +24,12 @@ func main() {
 			ShowCmd(gc),
 			ShowAllCmd(gc),
 		},
+		Run: func(cmd *cobra.Command, args []string) {
+			fmt.Println("Available profiles:")
+			for _, p := range gc.DetectedProfileNames() {
+				fmt.Println(fmt.Sprintf("  %v", p))
+			}
+		},
 	}.ToApp()
 
 }
