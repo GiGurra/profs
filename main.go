@@ -58,7 +58,7 @@ func ShowAllCmd(gc GlobalConfig) *cobra.Command {
 		Use:   "show-all",
 		Short: "Show full configuration and alternatives",
 		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Println(fmt.Sprintf("Full config: %s", PrettyJson(gc)))
+			fmt.Println(PrettyJson(gc))
 		},
 	}.ToCmd()
 }
