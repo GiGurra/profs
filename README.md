@@ -103,7 +103,7 @@ This command displays detailed information about all configured paths and detect
 ## Configuration
 
 The tool uses a configuration file located at `~/.profs/global.json`. This file should contain a JSON object with a
-`paths` array specifying the directories to manage.
+`paths` array specifying the directories/files to manage.
 
 Example configuration:
 
