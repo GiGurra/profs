@@ -63,7 +63,7 @@ Use "profs [command] --help" for more information about a command.
 ### Create auto completion scripts
 
 ```
-profs completion fish|bash|zsh|...
+> profs completion fish|bash|zsh|...
 ```
 
 ### Set Profile
@@ -71,7 +71,7 @@ profs completion fish|bash|zsh|...
 To set a profile:
 
 ```
-profs set <profile_name>
+> profs set <profile_name>
 ```
 
 This command will set the specified profile for all configured paths.
@@ -81,7 +81,8 @@ This command will set the specified profile for all configured paths.
 To view the current status:
 
 ```
-profs status
+> profs status
+personal
 ```
 
 This will show the active profile(s) or indicate if no profiles are active.
@@ -91,7 +92,8 @@ This will show the active profile(s) or indicate if no profiles are active.
 To view the full configuration and alternatives:
 
 ```
-profs status-full
+> profs status-full
+<<LOTS-OF-PRETTY-JSON>>
 ```
 
 This command displays detailed information about all configured paths and detected profiles.
@@ -106,8 +108,8 @@ Example configuration:
 ```json
 {
   "paths": [
-    "~/path/to/manage1",
-    "~/path/to/manage2"
+    "~/.ssh",
+    "~/.gitconfig"
   ]
 }
 ```
