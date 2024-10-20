@@ -1,10 +1,13 @@
 # profs
 
-`profs` is a custom CLI directory profiles tool that allows you to manage and switch between different profiles for
-specified directories. `profs` is pretty much just a symlink macro that manages a set of symlinks and user profiles.
+`profs` is a CLI tool that lets you switch between different profiles for specified directories. 
 
-The idea is to be able to quickly switch between for example work and personal profiles without necessarily having to
-use different computer accounts.
+Use cases: 
+  * `work` vs `personal` ssh+git config
+  * `customer1` vs `customer2` vs `customer3` cloud config
+  * etc
+
+The idea is to be able to quickly switch profiles without necessarily having to use different computer accounts.
 
 For example, let's say you have different git profiles (email and other diff config). Then you would want to create
 different versions of the `~/.gitconfig` file and switch between them. This could be achieved by creating a
