@@ -117,7 +117,6 @@ func SetCmd(gc GlobalConfig) *cobra.Command {
 					panic(fmt.Sprintf("Failed to create symlink: %v", err))
 				}
 			}
-			fmt.Println()
 		},
 	}.ToCmd()
 }
