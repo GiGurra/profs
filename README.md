@@ -1,5 +1,3 @@
-Here's a GitHub README for the `profs` tool based on the provided information:
-
 # profs
 
 `profs` is a custom CLI directory profiles tool that allows you to manage and switch between different profiles for
