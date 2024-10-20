@@ -5,6 +5,19 @@ Here's a GitHub README for the `profs` tool based on the provided information:
 `profs` is a custom CLI directory profiles tool that allows you to manage and switch between different profiles for
 specified directories.
 
+The idea is to be able to quickly switch between for example work and personal profiles without necessarily having to
+use different computer accounts.
+
+For example, let's say you have different git profiles (email and other diff config). Then you would want to create
+different versions of the `~/.gitconfig` file and switch between them. This could be achieved by creating a
+`~/.gitconfig.profs/work` and `~/.gitconfig.profs/personal`, and then using `profs` to switch between them.
+
+Let's say you wish to extend this to also have separate ssh configurations. Using `profs`, you would follow the same
+pattern and create `~/.ssh.profs/work` and `~/.ssh.profs/personal` directories.
+
+The default `~/.ssh` directory would be a symlink to the active profile directory. To switch all configurations, you
+would simply run `profs set work` or `profs set personal`.
+
 ## Features
 
 - Set and manage profiles for specified directories
