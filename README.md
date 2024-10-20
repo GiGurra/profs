@@ -1,7 +1,7 @@
 # profs
 
 `profs` is a custom CLI directory profiles tool that allows you to manage and switch between different profiles for
-specified directories. `profs` is basically works like a symlink macro that manages a set of symlinks and user profiles.
+specified directories. `profs` is pretty much just a symlink macro that manages a set of symlinks and user profiles.
 
 The idea is to be able to quickly switch between for example work and personal profiles without necessarily having to
 use different computer accounts.
