@@ -116,6 +116,8 @@ Example configuration:
 }
 ```
 
+Either use full absolute paths, or prefix with `~` for your own home dir.
+
 ## How It Works
 
 - The tool manages symlinks for the specified paths.
