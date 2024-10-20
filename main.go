@@ -4,9 +4,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/GiGurra/boa/pkg/boa"
+	"github.com/samber/lo"
 	"github.com/spf13/cobra"
+	"log/slog"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 type Params struct {
@@ -20,9 +23,10 @@ func main() {
 		Long:        "Load user profile",
 		Params:      &p,
 		ParamEnrich: boa.ParamEnricherDefault,
+
 		Run: func(cmd *cobra.Command, args []string) {
 			gc := LoadGlobalConf()
-			fmt.Println(fmt.Sprintf("Global config: %v", gc))
+			fmt.Println(fmt.Sprintf("Global config: %s", PrettyJson(gc)))
 			//res := cmder.New("ls", "-la").Run(context.Background())
 			//if res.Err != nil {
 			//	util.FailAndExit(fmt.Sprintf("Failed to run command: %v", res.Err))
@@ -57,7 +61,7 @@ func LoadGlobalConf() GlobalConfig {
 		panic(fmt.Sprintf("Failed to read global config file: %v", err))
 	}
 
-	gc := GlobalConfig{}
+	gc := GlobalConfigStored{}
 	err = json.Unmarshal(bytes, &gc)
 	if err != nil {
 		panic(fmt.Sprintf("Failed to parse global config from file: %v", err))
@@ -65,14 +69,81 @@ func LoadGlobalConf() GlobalConfig {
 
 	// convert any paths starting with ~ to absolute paths with home dir
 	for i, p := range gc.Paths {
-		if len(p) > 0 && p[0] == '~' {
+		if strings.HasPrefix(p, "~") {
 			gc.Paths[i] = filepath.Join(HomeDir(), p[1:])
 		}
 	}
 
-	return gc
+	return GlobalConfig{
+		Paths: lo.Map(gc.Paths, func(p string, _ int) Path {
+			path := func() string {
+				if strings.HasPrefix(p, "~") {
+					return filepath.Join(HomeDir(), p[1:])
+				} else {
+					return p
+				}
+			}()
+			profilesPath := path + ".profs"
+			return Path{
+				Path:     path,
+				Profiles: itemsOnPath(profilesPath),
+			}
+		}),
+	}
+}
+
+func itemsOnPath(path string) []string {
+	_, err := os.Stat(path)
+	if err != nil {
+		if os.IsNotExist(err) {
+			slog.Warn(fmt.Sprintf("Path does not exist: %v", path))
+			return []string{}
+		} else {
+			panic(fmt.Sprintf("Failed to stat path: %v", err))
+		}
+	}
+
+	files, err := os.ReadDir(path)
+	if err != nil {
+		panic(fmt.Sprintf("Failed to read dir: %v", err))
+	}
+
+	var items []string
+	for _, f := range files {
+		if f.IsDir() || f.Type().IsRegular() || isSymlink(f) {
+			items = append(items, f.Name())
+		}
+	}
+
+	return items
+}
+
+func isSymlink(f os.DirEntry) bool {
+	fi, err := f.Info()
+	if err != nil {
+		panic(fmt.Sprintf("Failed to get file info: %v", err))
+	}
+	return fi.Mode()&os.ModeSymlink == os.ModeSymlink
+}
+
+type GlobalConfigStored struct {
+	Paths []string `json:"paths"`
 }
 
 type GlobalConfig struct {
-	Paths []string `json:"paths"`
+	Paths []Path
+}
+
+type Path struct {
+	Path     string
+	Profiles []string
+}
+
+func PrettyJson[T any](t T) string {
+	bytes, err := json.MarshalIndent(t, "", "  ")
+	if err != nil {
+		panic(fmt.Sprintf("Failed to marshal to json: %v", err))
+	}
+
+	return string(bytes)
 }
