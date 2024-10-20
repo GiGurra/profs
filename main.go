@@ -5,13 +5,12 @@ import (
 	"fmt"
 	"github.com/GiGurra/boa/pkg/boa"
 	"github.com/spf13/cobra"
-	"log/slog"
 	"os"
 	"path/filepath"
 )
 
 type Params struct {
-	Profile boa.Required[int] `descr:"The profile to load"`
+	Profile boa.Required[string] `descr:"The profile to load" positional:"true"`
 }
 
 func main() {
@@ -23,7 +22,7 @@ func main() {
 		ParamEnrich: boa.ParamEnricherDefault,
 		Run: func(cmd *cobra.Command, args []string) {
 			gc := LoadGlobalConf()
-			slog.Info(fmt.Sprintf("Global config: %v", gc))
+			fmt.Println(fmt.Sprintf("Global config: %v", gc))
 			//res := cmder.New("ls", "-la").Run(context.Background())
 			//if res.Err != nil {
 			//	util.FailAndExit(fmt.Sprintf("Failed to run command: %v", res.Err))
@@ -62,6 +61,13 @@ func LoadGlobalConf() GlobalConfig {
 	err = json.Unmarshal(bytes, &gc)
 	if err != nil {
 		panic(fmt.Sprintf("Failed to parse global config from file: %v", err))
+	}
+
+	// convert any paths starting with ~ to absolute paths with home dir
+	for i, p := range gc.Paths {
+		if len(p) > 0 && p[0] == '~' {
+			gc.Paths[i] = filepath.Join(HomeDir(), p[1:])
+		}
 	}
 
 	return gc
