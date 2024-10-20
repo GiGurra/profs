@@ -23,7 +23,7 @@ func main() {
 		Long:        "Load user profile",
 		Params:      &p,
 		ParamEnrich: boa.ParamEnricherDefault,
-
+		ValidArgs:   LoadGlobalConf().ProfileNames(),
 		Run: func(cmd *cobra.Command, args []string) {
 			gc := LoadGlobalConf()
 			fmt.Println(fmt.Sprintf("Global config: %s", PrettyJson(gc)))
@@ -136,6 +136,14 @@ type GlobalConfigStored struct {
 
 type GlobalConfig struct {
 	Paths []Path
+}
+
+func (g GlobalConfig) ProfileNames() []string {
+	return lo.Uniq(lo.FlatMap(g.Paths, func(p Path, _ int) []string {
+		return lo.Map(p.Profiles, func(prof Profile, _ int) string {
+			return prof.Name
+		})
+	}))
 }
 
 type Path struct {
