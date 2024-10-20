@@ -21,17 +21,33 @@ func main() {
 		Long: "Load user profile",
 		SubCommands: []*cobra.Command{
 			SetCmd(gc),
-			boa.Wrap{
-				Use:  "show",
-				Long: "Show current configuration",
-				Run: func(cmd *cobra.Command, args []string) {
-					gc := LoadGlobalConf()
-					fmt.Println(fmt.Sprintf("Global config: %s", PrettyJson(gc)))
-				},
-			}.ToCmd(),
+			ShowCmd(gc),
+			ShowAllCmd(gc),
 		},
 	}.ToApp()
 
+}
+
+func ShowCmd(gc GlobalConfig) *cobra.Command {
+	return boa.Wrap{
+		Use:  "show",
+		Long: "Show current configuration",
+		Run: func(cmd *cobra.Command, args []string) {
+			gc := LoadGlobalConf()
+			fmt.Println(fmt.Sprintf("Global config: %s", PrettyJson(gc)))
+		},
+	}.ToCmd()
+}
+
+func ShowAllCmd(gc GlobalConfig) *cobra.Command {
+	return boa.Wrap{
+		Use:  "show-all",
+		Long: "Show full configuration and alternatives",
+		Run: func(cmd *cobra.Command, args []string) {
+			gc := LoadGlobalConf()
+			fmt.Println(fmt.Sprintf("Global config: %s", PrettyJson(gc)))
+		},
+	}.ToCmd()
 }
 
 func SetCmd(gc GlobalConfig) *cobra.Command {
@@ -101,10 +117,28 @@ func LoadGlobalConf() GlobalConfig {
 					return p
 				}
 			}()
-			profilesPath := path + ".profs"
+			detectedProfs := profsOnPath(path + ".profs")
+			status := StatusErrorTgtNotFound
+			var target *DetectedProfile = nil
+
+			if isSymlink(path) {
+				symLinKT := symlinkTarget(path)
+				_, i, found := lo.FindIndexOf(detectedProfs, func(prof DetectedProfile) bool {
+					return pathsAreEqual(prof.Path, symLinKT)
+				})
+
+				if found {
+					status = StatusOk
+					target = &detectedProfs[i]
+				}
+
+			}
+
 			return Path{
 				Path:          path,
-				DetectedProfs: profsOnPath(profilesPath),
+				DetectedProfs: detectedProfs,
+				Target:        target,
+				Status:        status,
 			}
 		}),
 	}
@@ -128,7 +162,7 @@ func profsOnPath(path string) []DetectedProfile {
 
 	var items []DetectedProfile
 	for _, f := range files {
-		if f.IsDir() || f.Type().IsRegular() || isSymlink(f) {
+		if f.IsDir() || f.Type().IsRegular() || isSymlinkE(f) {
 			fullPath := filepath.Join(path, f.Name())
 			items = append(items, DetectedProfile{
 				Name: f.Name(),
@@ -140,12 +174,44 @@ func profsOnPath(path string) []DetectedProfile {
 	return items
 }
 
-func isSymlink(f os.DirEntry) bool {
+func pathsAreEqual(p1, p2 string) bool {
+	return filepath.Clean(p1) == filepath.Clean(p2)
+}
+
+func isSymlink(path string) bool {
+	fi, err := os.Lstat(path)
+	if err != nil {
+		panic(fmt.Sprintf("Failed to get file info: %v", err))
+	}
+
+	return fi.Mode()&os.ModeSymlink == os.ModeSymlink
+}
+
+func isSymlinkE(f os.DirEntry) bool {
 	fi, err := f.Info()
 	if err != nil {
 		panic(fmt.Sprintf("Failed to get file info: %v", err))
 	}
 	return fi.Mode()&os.ModeSymlink == os.ModeSymlink
+}
+
+func symlinkTarget(path string) string {
+
+	fi, err := os.Lstat(path)
+	if err != nil {
+		panic(fmt.Sprintf("Failed to get file info: %v", err))
+	}
+
+	if fi.Mode()&os.ModeSymlink != os.ModeSymlink {
+		panic(fmt.Sprintf("Not a symlink: %v", path))
+	}
+
+	target, err := os.Readlink(path)
+	if err != nil {
+		panic(fmt.Sprintf("Failed to read symlink target: %v", err))
+	}
+
+	return target
 }
 
 type GlobalConfigStored struct {
@@ -167,7 +233,17 @@ func (g GlobalConfig) DetectedProfileNames() []string {
 type Path struct {
 	Path          string
 	DetectedProfs []DetectedProfile
+	Target        *DetectedProfile
+	Status        Status
 }
+
+type Status string
+
+const (
+	StatusOk               Status = "ok"
+	StatusErrorTgtNotFound Status = "error_tgt_not_found"
+	StatusErrorTgtNotProf  Status = "error_tgt_not_prof"
+)
 
 type DetectedProfile struct {
 	Name string
