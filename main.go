@@ -17,8 +17,8 @@ func main() {
 	gc := LoadGlobalConf()
 
 	boa.Wrap{
-		Use:  "profs",
-		Long: "Load user profile",
+		Use:   "profs",
+		Short: "Load user profile",
 		SubCommands: []*cobra.Command{
 			SetCmd(gc),
 			ShowCmd(gc),
@@ -30,22 +30,35 @@ func main() {
 
 func ShowCmd(gc GlobalConfig) *cobra.Command {
 	return boa.Wrap{
-		Use:  "show",
-		Long: "Show current configuration",
+		Use:   "show",
+		Short: "Show current configuration",
 		Run: func(cmd *cobra.Command, args []string) {
-			gc := LoadGlobalConf()
-			fmt.Println(fmt.Sprintf("Global config: %s", PrettyJson(gc)))
+			profileNames := gc.ActiveProfileNames()
+			if len(gc.ActiveProfileNames()) == 0 {
+				fmt.Println("No active profiles")
+			} else if len(gc.ActiveProfileNames()) == 1 {
+				fmt.Println(profileNames[0])
+				if !gc.AllProfilesResolved() {
+					fmt.Println("WARNING: Not all configured profile resolved!")
+					fmt.Println(" -> Run 'profs show-all' to see full configuration")
+				}
+			} else {
+				fmt.Println("WARNING: Multiple active profiles:")
+				for _, p := range profileNames {
+					fmt.Println(fmt.Sprintf("  %v", p))
+				}
+				fmt.Println(" -> Run 'profs show-all' to see full configuration")
+			}
 		},
 	}.ToCmd()
 }
 
 func ShowAllCmd(gc GlobalConfig) *cobra.Command {
 	return boa.Wrap{
-		Use:  "show-all",
-		Long: "Show full configuration and alternatives",
+		Use:   "show-all",
+		Short: "Show full configuration and alternatives",
 		Run: func(cmd *cobra.Command, args []string) {
-			gc := LoadGlobalConf()
-			fmt.Println(fmt.Sprintf("Global config: %s", PrettyJson(gc)))
+			fmt.Println(fmt.Sprintf("Full config: %s", PrettyJson(gc)))
 		},
 	}.ToCmd()
 }
@@ -60,7 +73,7 @@ func SetCmd(gc GlobalConfig) *cobra.Command {
 
 	return boa.Wrap{
 		Use:         "set",
-		Long:        "Set current profile",
+		Short:       "Set current profile",
 		Params:      &params,
 		ParamEnrich: boa.ParamEnricherDefault,
 		ValidArgs:   params.Profile.GetAlternatives(),
@@ -118,30 +131,64 @@ func LoadGlobalConf() GlobalConfig {
 				}
 			}()
 			detectedProfs := profsOnPath(path + ".profs")
-			status := StatusErrorTgtNotFound
-			var target *DetectedProfile = nil
+			status := StatusErrorSrcNotFound
+			var resolvedTgt *DetectedProfile = nil
+			var target *string = nil
 
-			if isSymlink(path) {
+			if !fileExists(path) {
+				status = StatusErrorSrcNotFound
+			} else if isSymlink(path) {
 				symLinKT := symlinkTarget(path)
-				_, i, found := lo.FindIndexOf(detectedProfs, func(prof DetectedProfile) bool {
-					return pathsAreEqual(prof.Path, symLinKT)
-				})
-
-				if found {
-					status = StatusOk
-					target = &detectedProfs[i]
+				target = &symLinKT
+				if isRelativePath(symLinKT) {
+					symLinKT = filepath.Join(filepath.Dir(path), symLinKT)
 				}
 
+				if !fileExists(symLinKT) {
+					status = StatusErrorTgtNotFound
+				} else {
+
+					_, i, found := lo.FindIndexOf(detectedProfs, func(prof DetectedProfile) bool {
+						return pathsAreEqual(prof.Path, symLinKT)
+					})
+
+					if found {
+						status = StatusOk
+						resolvedTgt = &detectedProfs[i]
+					} else {
+						status = StatusErrorTgtUnresolvable
+					}
+				}
+			} else {
+				status = StatusErrorSrcNotSymlink
 			}
 
 			return Path{
 				Path:          path,
 				DetectedProfs: detectedProfs,
-				Target:        target,
+				Tgt:           target,
+				ResolvedTgt:   resolvedTgt,
 				Status:        status,
 			}
 		}),
 	}
+}
+
+func fileExists(path string) bool {
+	_, err := os.Stat(path)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return false
+		} else {
+			panic(fmt.Sprintf("Failed to stat path: %v", err))
+		}
+	}
+
+	return true
+}
+
+func isRelativePath(path string) bool {
+	return !filepath.IsAbs(path)
 }
 
 func profsOnPath(path string) []DetectedProfile {
@@ -181,6 +228,10 @@ func pathsAreEqual(p1, p2 string) bool {
 func isSymlink(path string) bool {
 	fi, err := os.Lstat(path)
 	if err != nil {
+		if os.IsNotExist(err) {
+			slog.Warn(fmt.Sprintf("Path does not exist: %v", path))
+			return false
+		}
 		panic(fmt.Sprintf("Failed to get file info: %v", err))
 	}
 
@@ -230,19 +281,38 @@ func (g GlobalConfig) DetectedProfileNames() []string {
 	}))
 }
 
+func (g GlobalConfig) ActiveProfileNames() []string {
+	return lo.Uniq(lo.FlatMap(g.Paths, func(p Path, _ int) []string {
+		if p.ResolvedTgt != nil {
+			return []string{p.ResolvedTgt.Name}
+		} else {
+			return []string{}
+		}
+	}))
+}
+
+func (g GlobalConfig) AllProfilesResolved() bool {
+	return lo.EveryBy(g.Paths, func(p Path) bool {
+		return p.Status == StatusOk
+	})
+}
+
 type Path struct {
-	Path          string
-	DetectedProfs []DetectedProfile
-	Target        *DetectedProfile
-	Status        Status
+	Path          string            `json:"path"`
+	Status        Status            `json:"status"`
+	Tgt           *string           `json:"tgt"`
+	ResolvedTgt   *DetectedProfile  `json:"resolvedTgt"`
+	DetectedProfs []DetectedProfile `json:"detectedProfs"`
 }
 
 type Status string
 
 const (
-	StatusOk               Status = "ok"
-	StatusErrorTgtNotFound Status = "error_tgt_not_found"
-	StatusErrorTgtNotProf  Status = "error_tgt_not_prof"
+	StatusOk                   Status = "ok"
+	StatusErrorSrcNotFound     Status = "error_src_not_found"
+	StatusErrorTgtNotFound     Status = "error_tgt_not_found"
+	StatusErrorSrcNotSymlink   Status = "error_tgt_not_prof"
+	StatusErrorTgtUnresolvable Status = "error_tgt_not_resolvable"
 )
 
 type DetectedProfile struct {
