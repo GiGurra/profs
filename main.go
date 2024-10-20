@@ -86,18 +86,18 @@ func LoadGlobalConf() GlobalConfig {
 			profilesPath := path + ".profs"
 			return Path{
 				Path:     path,
-				Profiles: itemsOnPath(profilesPath),
+				Profiles: profsOnPath(profilesPath),
 			}
 		}),
 	}
 }
 
-func itemsOnPath(path string) []string {
+func profsOnPath(path string) []Profile {
 	_, err := os.Stat(path)
 	if err != nil {
 		if os.IsNotExist(err) {
 			slog.Warn(fmt.Sprintf("Path does not exist: %v", path))
-			return []string{}
+			return []Profile{}
 		} else {
 			panic(fmt.Sprintf("Failed to stat path: %v", err))
 		}
@@ -108,10 +108,14 @@ func itemsOnPath(path string) []string {
 		panic(fmt.Sprintf("Failed to read dir: %v", err))
 	}
 
-	var items []string
+	var items []Profile
 	for _, f := range files {
 		if f.IsDir() || f.Type().IsRegular() || isSymlink(f) {
-			items = append(items, f.Name())
+			fullPath := filepath.Join(path, f.Name())
+			items = append(items, Profile{
+				Name: f.Name(),
+				Path: fullPath,
+			})
 		}
 	}
 
@@ -136,7 +140,12 @@ type GlobalConfig struct {
 
 type Path struct {
 	Path     string
-	Profiles []string
+	Profiles []Profile
+}
+
+type Profile struct {
+	Name string
+	Path string
 }
 
 func PrettyJson[T any](t T) string {
