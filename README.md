@@ -134,3 +134,4 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 - Johan Kjölhede
 - Claude 3.5
+- GitHub Copilot
