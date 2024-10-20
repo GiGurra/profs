@@ -104,15 +104,13 @@ func SetCmd(gc GlobalConfig) *cobra.Command {
 				}
 
 				// remove existing symlink
-				if p.ResolvedTgt != nil {
-					err := os.Remove(p.Path)
-					if err != nil {
-						panic(fmt.Sprintf("Failed to remove existing symlink: %v", err))
-					}
+				err := os.Remove(p.Path)
+				if err != nil {
+					panic(fmt.Sprintf("Failed to remove existing symlink: %v", err))
 				}
 
 				// create new symlink
-				err := os.Symlink(tgt.Path, p.Path)
+				err = os.Symlink(tgt.Path, p.Path)
 				if err != nil {
 					panic(fmt.Sprintf("Failed to create symlink: %v", err))
 				}
