@@ -103,6 +103,10 @@ func SetCmd(gc GlobalConfig) *cobra.Command {
 					continue
 				}
 
+				if !isSymlink(p.SrcPath) {
+					panic(fmt.Sprintf("SrcPath is not a symlink: %v", p.SrcPath))
+				}
+
 				// remove existing symlink
 				if fileExists(p.SrcPath) {
 					err := os.Remove(p.SrcPath)
