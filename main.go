@@ -21,22 +21,16 @@ func main() {
 		Short: "Load user profile",
 		SubCommands: []*cobra.Command{
 			SetCmd(gc),
-			ShowCmd(gc),
-			ShowAllCmd(gc),
-		},
-		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Println("Available profiles:")
-			for _, p := range gc.DetectedProfileNames() {
-				fmt.Println(fmt.Sprintf("  %v", p))
-			}
+			StatusCmd(gc),
+			FullStatusCmd(gc),
 		},
 	}.ToApp()
 
 }
 
-func ShowCmd(gc GlobalConfig) *cobra.Command {
+func StatusCmd(gc GlobalConfig) *cobra.Command {
 	return boa.Wrap{
-		Use:   "show",
+		Use:   "status",
 		Short: "Show current configuration",
 		Run: func(cmd *cobra.Command, args []string) {
 			profileNames := gc.ActiveProfileNames()
@@ -59,9 +53,9 @@ func ShowCmd(gc GlobalConfig) *cobra.Command {
 	}.ToCmd()
 }
 
-func ShowAllCmd(gc GlobalConfig) *cobra.Command {
+func FullStatusCmd(gc GlobalConfig) *cobra.Command {
 	return boa.Wrap{
-		Use:   "show-all",
+		Use:   "full-status",
 		Short: "Show full configuration and alternatives",
 		Run: func(cmd *cobra.Command, args []string) {
 			fmt.Println(PrettyJson(gc))
