@@ -86,6 +86,37 @@ func SetCmd(gc GlobalConfig) *cobra.Command {
 				}
 				os.Exit(1)
 			}
+
+			for _, p := range gc.Paths {
+				fmt.Printf("Setting profile %v for path %s\n", params.Profile.Value(), p.Path)
+				if p.Status != StatusOk && p.Status != StatusErrorTgtNotFound {
+					fmt.Printf("WARNING: Unable to set profile %v for path %s, because it has status %v\n", params.Profile.Value(), p.Path, p.Status)
+					continue
+				}
+
+				tgt, found := lo.Find(p.DetectedProfs, func(prof DetectedProfile) bool {
+					return prof.Name == params.Profile.Value()
+				})
+
+				if !found {
+					fmt.Printf("WARNING: Unable to set profile %v for path %s, because it is not detected\n", params.Profile.Value(), p.Path)
+					continue
+				}
+
+				// remove existing symlink
+				if p.ResolvedTgt != nil {
+					err := os.Remove(p.Path)
+					if err != nil {
+						panic(fmt.Sprintf("Failed to remove existing symlink: %v", err))
+					}
+				}
+
+				// create new symlink
+				err := os.Symlink(tgt.Path, p.Path)
+				if err != nil {
+					panic(fmt.Sprintf("Failed to create symlink: %v", err))
+				}
+			}
 			fmt.Println()
 		},
 	}.ToCmd()
