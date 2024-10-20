@@ -12,29 +12,47 @@ import (
 	"strings"
 )
 
-type Params struct {
-	Profile boa.Required[string] `descr:"The profile to load" positional:"true"`
+func main() {
+
+	gc := LoadGlobalConf()
+
+	boa.Wrap{
+		Use:  "profs",
+		Long: "Load user profile",
+		SubCommands: []*cobra.Command{
+			SetCmd(gc),
+			boa.Wrap{
+				Use:  "show",
+				Long: "Show current configuration",
+				Run: func(cmd *cobra.Command, args []string) {
+					gc := LoadGlobalConf()
+					fmt.Println(fmt.Sprintf("Global config: %s", PrettyJson(gc)))
+				},
+			}.ToCmd(),
+		},
+	}.ToApp()
+
 }
 
-func main() {
-	p := Params{}
-	boa.Wrap{
-		Use:         "profs",
-		Long:        "Load user profile",
-		Params:      &p,
+func SetCmd(gc GlobalConfig) *cobra.Command {
+
+	var params struct {
+		Profile boa.Required[string] `descr:"The profile to load" positional:"true"`
+	}
+
+	params.Profile.SetAlternatives(gc.DetectedProfileNames())
+
+	return boa.Wrap{
+		Use:         "set",
+		Long:        "Set current profile",
+		Params:      &params,
 		ParamEnrich: boa.ParamEnricherDefault,
-		ValidArgs:   LoadGlobalConf().ProfileNames(),
+		ValidArgs:   params.Profile.GetAlternatives(),
 		Run: func(cmd *cobra.Command, args []string) {
 			gc := LoadGlobalConf()
 			fmt.Println(fmt.Sprintf("Global config: %s", PrettyJson(gc)))
-			//res := cmder.New("ls", "-la").Run(context.Background())
-			//if res.Err != nil {
-			//	util.FailAndExit(fmt.Sprintf("Failed to run command: %v", res.Err))
-			//}
-			//
-			//slog.Info(fmt.Sprintf("Result: %v", res.StdOut))
 		},
-	}.ToApp()
+	}.ToCmd()
 }
 
 func HomeDir() string {
@@ -85,19 +103,19 @@ func LoadGlobalConf() GlobalConfig {
 			}()
 			profilesPath := path + ".profs"
 			return Path{
-				Path:     path,
-				Profiles: profsOnPath(profilesPath),
+				Path:          path,
+				DetectedProfs: profsOnPath(profilesPath),
 			}
 		}),
 	}
 }
 
-func profsOnPath(path string) []Profile {
+func profsOnPath(path string) []DetectedProfile {
 	_, err := os.Stat(path)
 	if err != nil {
 		if os.IsNotExist(err) {
 			slog.Warn(fmt.Sprintf("Path does not exist: %v", path))
-			return []Profile{}
+			return []DetectedProfile{}
 		} else {
 			panic(fmt.Sprintf("Failed to stat path: %v", err))
 		}
@@ -108,11 +126,11 @@ func profsOnPath(path string) []Profile {
 		panic(fmt.Sprintf("Failed to read dir: %v", err))
 	}
 
-	var items []Profile
+	var items []DetectedProfile
 	for _, f := range files {
 		if f.IsDir() || f.Type().IsRegular() || isSymlink(f) {
 			fullPath := filepath.Join(path, f.Name())
-			items = append(items, Profile{
+			items = append(items, DetectedProfile{
 				Name: f.Name(),
 				Path: fullPath,
 			})
@@ -138,20 +156,20 @@ type GlobalConfig struct {
 	Paths []Path
 }
 
-func (g GlobalConfig) ProfileNames() []string {
+func (g GlobalConfig) DetectedProfileNames() []string {
 	return lo.Uniq(lo.FlatMap(g.Paths, func(p Path, _ int) []string {
-		return lo.Map(p.Profiles, func(prof Profile, _ int) string {
+		return lo.Map(p.DetectedProfs, func(prof DetectedProfile, _ int) string {
 			return prof.Name
 		})
 	}))
 }
 
 type Path struct {
-	Path     string
-	Profiles []Profile
+	Path          string
+	DetectedProfs []DetectedProfile
 }
 
-type Profile struct {
+type DetectedProfile struct {
 	Name string
 	Path string
 }
