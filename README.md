@@ -16,6 +16,9 @@ pattern and create `~/.ssh.profs/work` and `~/.ssh.profs/personal` directories.
 The default `~/.ssh` directory would be a symlink to the active profile directory. To switch all configurations, you
 would simply run `profs set work` or `profs set personal`.
 
+WARNING: This is a hack created in about 2 hours. You should probably expect bugs and other issues. There are currently
+zero automated tests. Use at your own risk. :)
+
 ## Features
 
 - Set and manage profiles for specified directories
@@ -97,9 +100,4 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 ## Authors
 
 - Johan Kjölhede
-
----
-
-This README provides a basic overview of the `profs` tool, its usage, and configuration. You may want to expand on
-certain sections, add examples, or include more detailed instructions depending on the complexity and specific use cases
-of your tool.
+- Claude 3.5
