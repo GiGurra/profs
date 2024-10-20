@@ -72,6 +72,8 @@ To set a profile:
 
 ```
 > profs set <profile_name>
+Setting profile <profile_name> for path <homedir>/.ssh
+Setting profile <profile_name> for path <homedir>/.gitconfig
 ```
 
 This command will set the specified profile for all configured paths.
