@@ -88,9 +88,9 @@ func SetCmd(gc GlobalConfig) *cobra.Command {
 			}
 
 			for _, p := range gc.Paths {
-				fmt.Printf("Setting profile %v for path %s\n", params.Profile.Value(), p.Path)
+				fmt.Printf("Setting profile %v for path %s\n", params.Profile.Value(), p.SrcPath)
 				if p.Status != StatusOk && p.Status != StatusErrorTgtNotFound {
-					fmt.Printf("WARNING: Unable to set profile %v for path %s, because it has status %v\n", params.Profile.Value(), p.Path, p.Status)
+					fmt.Printf("WARNING: Unable to set profile %v for path %s, because it has status %v\n", params.Profile.Value(), p.SrcPath, p.Status)
 					continue
 				}
 
@@ -99,18 +99,18 @@ func SetCmd(gc GlobalConfig) *cobra.Command {
 				})
 
 				if !found {
-					fmt.Printf("WARNING: Unable to set profile %v for path %s, because it is not detected\n", params.Profile.Value(), p.Path)
+					fmt.Printf("WARNING: Unable to set profile %v for path %s, because it is not detected\n", params.Profile.Value(), p.SrcPath)
 					continue
 				}
 
 				// remove existing symlink
-				err := os.Remove(p.Path)
+				err := os.Remove(p.SrcPath)
 				if err != nil {
 					panic(fmt.Sprintf("Failed to remove existing symlink: %v", err))
 				}
 
 				// create new symlink
-				err = os.Symlink(tgt.Path, p.Path)
+				err = os.Symlink(tgt.Path, p.SrcPath)
 				if err != nil {
 					panic(fmt.Sprintf("Failed to create symlink: %v", err))
 				}
@@ -199,9 +199,9 @@ func LoadGlobalConf() GlobalConfig {
 			}
 
 			return Path{
-				Path:          path,
+				SrcPath:       path,
 				DetectedProfs: detectedProfs,
-				Tgt:           target,
+				TgtPath:       target,
 				ResolvedTgt:   resolvedTgt,
 				Status:        status,
 			}
@@ -230,7 +230,7 @@ func profsOnPath(path string) []DetectedProfile {
 	_, err := os.Stat(path)
 	if err != nil {
 		if os.IsNotExist(err) {
-			slog.Warn(fmt.Sprintf("Path does not exist: %v", path))
+			slog.Warn(fmt.Sprintf("SrcPath does not exist: %v", path))
 			return []DetectedProfile{}
 		} else {
 			panic(fmt.Sprintf("Failed to stat path: %v", err))
@@ -264,7 +264,7 @@ func isSymlink(path string) bool {
 	fi, err := os.Lstat(path)
 	if err != nil {
 		if os.IsNotExist(err) {
-			slog.Warn(fmt.Sprintf("Path does not exist: %v", path))
+			slog.Warn(fmt.Sprintf("SrcPath does not exist: %v", path))
 			return false
 		}
 		panic(fmt.Sprintf("Failed to get file info: %v", err))
@@ -333,9 +333,9 @@ func (g GlobalConfig) AllProfilesResolved() bool {
 }
 
 type Path struct {
-	Path          string            `json:"path"`
+	SrcPath       string            `json:"srcPath"`
 	Status        Status            `json:"status"`
-	Tgt           *string           `json:"tgt"`
+	TgtPath       *string           `json:"tgtPath"`
 	ResolvedTgt   *DetectedProfile  `json:"resolvedTgt"`
 	DetectedProfs []DetectedProfile `json:"detectedProfs"`
 }
