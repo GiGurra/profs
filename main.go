@@ -22,6 +22,7 @@ func main() {
 		SubCommands: []*cobra.Command{
 			SetCmd(gc),
 			StatusCmd(gc),
+			StatusProfileCmd(gc),
 			FullStatusCmd(gc),
 		},
 	}.ToApp()
@@ -33,6 +34,34 @@ func StatusCmd(gc GlobalConfig) *cobra.Command {
 		Use:   "status",
 		Short: "Show current configuration",
 		Run: func(cmd *cobra.Command, args []string) {
+			profileOf := func(p Path) string {
+				if p.ResolvedTgt != nil {
+					return p.ResolvedTgt.Name
+				} else {
+					return ""
+				}
+			}
+
+			grouped := lo.GroupBy(gc.Paths, profileOf)
+			for profile, paths := range grouped {
+				fmt.Println("Profile: " + profile)
+				for _, p := range paths {
+					infoStr := ""
+					if p.TgtPath != nil {
+						infoStr = infoStr + *p.TgtPath + " [" + string(p.Status) + "]"
+					}
+					fmt.Println(fmt.Sprintf("  %v -> %v", p.SrcPath, infoStr))
+				}
+			}
+		},
+	}.ToCmd()
+}
+
+func StatusProfileCmd(gc GlobalConfig) *cobra.Command {
+	return boa.Wrap{
+		Use:   "status-profile",
+		Short: "Show current configuration",
+		Run: func(cmd *cobra.Command, args []string) {
 			profileNames := gc.ActiveProfileNames()
 			if len(gc.ActiveProfileNames()) == 0 {
 				fmt.Println("No active profiles")
@@ -40,7 +69,7 @@ func StatusCmd(gc GlobalConfig) *cobra.Command {
 				fmt.Println(profileNames[0])
 				if !gc.AllProfilesResolved() {
 					fmt.Println("WARNING: Not all configured profile resolved!")
-					fmt.Println(" -> Run 'profs show-all' to see full configuration")
+					fmt.Println(" -> Run 'profs status-all' to see full configuration")
 				}
 			} else {
 				fmt.Println("WARNING: Multiple active profiles:")
