@@ -118,7 +118,7 @@ func SetCmd(gc GlobalConfig) *cobra.Command {
 
 			for _, p := range gc.Paths {
 				fmt.Printf("Setting profile %v for path %s\n", params.Profile.Value(), p.SrcPath)
-				if p.Status != StatusOk && p.Status != StatusErrorTgtNotFound {
+				if p.Status != StatusOk && p.Status != StatusErrorTgtNotFound && p.Status != StatusErrorSrcNotFound {
 					fmt.Printf("WARNING: Unable to set profile %v for path %s, because it has status %v\n", params.Profile.Value(), p.SrcPath, p.Status)
 					continue
 				}
@@ -132,7 +132,7 @@ func SetCmd(gc GlobalConfig) *cobra.Command {
 					continue
 				}
 
-				if !isSymlink(p.SrcPath) {
+				if fileExists(p.SrcPath) && !isSymlink(p.SrcPath) {
 					panic(fmt.Sprintf("SrcPath is not a symlink: %v", p.SrcPath))
 				}
 
@@ -193,25 +193,25 @@ func LoadGlobalConf() GlobalConfig {
 
 	return GlobalConfig{
 		Paths: lo.Map(gc.Paths, func(p string, _ int) Path {
-			path := func() string {
+			symSrcPath := func() string {
 				if strings.HasPrefix(p, "~") {
 					return filepath.Join(HomeDir(), p[1:])
 				} else {
 					return p
 				}
 			}()
-			detectedProfs := profsOnPath(path + ".profs")
+			detectedProfs := profsOnPath(symSrcPath + ".profs")
 			status := StatusErrorSrcNotFound
 			var resolvedTgt *DetectedProfile = nil
 			var target *string = nil
 
-			if !fileExists(path) {
+			if !fileExists(symSrcPath) {
 				status = StatusErrorSrcNotFound
-			} else if isSymlink(path) {
-				symLinKT := symlinkTarget(path)
+			} else if isSymlink(symSrcPath) {
+				symLinKT := symlinkTarget(symSrcPath)
 				target = &symLinKT
 				if isRelativePath(symLinKT) {
-					symLinKT = filepath.Join(filepath.Dir(path), symLinKT)
+					symLinKT = filepath.Join(filepath.Dir(symSrcPath), symLinKT)
 				}
 
 				if !fileExists(symLinKT) {
@@ -234,7 +234,7 @@ func LoadGlobalConf() GlobalConfig {
 			}
 
 			return Path{
-				SrcPath:       path,
+				SrcPath:       symSrcPath,
 				DetectedProfs: detectedProfs,
 				TgtPath:       target,
 				ResolvedTgt:   resolvedTgt,
