@@ -72,6 +72,8 @@ To set a profile:
 
 ```
 > profs set <profile_name>
+Setting profile <profile_name> for path <homedir>/.ssh
+Setting profile <profile_name> for path <homedir>/.gitconfig
 ```
 
 This command will set the specified profile for all configured paths.
@@ -101,7 +103,7 @@ This command displays detailed information about all configured paths and detect
 ## Configuration
 
 The tool uses a configuration file located at `~/.profs/global.json`. This file should contain a JSON object with a
-`paths` array specifying the directories to manage.
+`paths` array specifying the directories/files to manage.
 
 Example configuration:
 
@@ -113,6 +115,8 @@ Example configuration:
   ]
 }
 ```
+
+Either use full absolute paths, or prefix with `~` for your own home dir.
 
 ## How It Works
 
