@@ -29,6 +29,15 @@ func main() {
 
 }
 
+func simplifyPath(in string) string {
+	homeDir := HomeDir()
+	if strings.HasPrefix(in, homeDir) {
+		return "~" + in[len(homeDir):]
+	} else {
+		return in
+	}
+}
+
 func StatusCmd(gc GlobalConfig) *cobra.Command {
 	return boa.Wrap{
 		Use:   "status",
@@ -44,13 +53,30 @@ func StatusCmd(gc GlobalConfig) *cobra.Command {
 
 			grouped := lo.GroupBy(gc.Paths, profileOf)
 			for profile, paths := range grouped {
+
+				longestSrc := 0
+
+				// for padding
+				for _, p := range paths {
+					srcLen := len(simplifyPath(p.SrcPath))
+					if srcLen > longestSrc {
+						longestSrc = srcLen
+					}
+				}
+
 				fmt.Println("Profile: " + profile)
 				for _, p := range paths {
+
+					src := simplifyPath(p.SrcPath)
+					if len(src) < longestSrc {
+						src += strings.Repeat(" ", longestSrc-len(src))
+					}
+
 					infoStr := ""
 					if p.TgtPath != nil {
-						infoStr = infoStr + *p.TgtPath + " [" + string(p.Status) + "]"
+						infoStr = infoStr + simplifyPath(*p.TgtPath) + " [" + string(p.Status) + "]"
 					}
-					fmt.Println(fmt.Sprintf("  %v -> %v", p.SrcPath, infoStr))
+					fmt.Println(fmt.Sprintf("  %v -> %v", src, infoStr))
 				}
 			}
 		},
