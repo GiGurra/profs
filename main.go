@@ -190,11 +190,30 @@ func HomeDir() string {
 }
 
 func ConfigDir() string {
-	return filepath.Join(HomeDir(), ".profs")
+	path := filepath.Join(HomeDir(), ".profs")
+	err := os.MkdirAll(path, os.ModePerm)
+	if err != nil {
+		panic(fmt.Sprintf("Failed to read or create config dir: %v", err))
+	}
+	return path
 }
 
 func GlobalConfigPath() string {
-	return filepath.Join(ConfigDir(), "global.json")
+	filePath := filepath.Join(ConfigDir(), "global.json")
+	// check that file exists
+	if _, err := os.Stat(filePath); os.IsNotExist(err) {
+		// create a blank config and save it
+		blankConfig := GlobalConfigStored{}
+		jsBytes, err := json.MarshalIndent(blankConfig, "", "  ")
+		if err != nil {
+			panic(fmt.Sprintf("Failed to marshal blank config to json: %v", err))
+		}
+		err = os.WriteFile(filePath, jsBytes, os.ModePerm)
+		if err != nil {
+			panic(fmt.Sprintf("Failed to write blank config to file: %v", err))
+		}
+	}
+	return filePath
 }
 
 func LoadGlobalConf() GlobalConfig {
