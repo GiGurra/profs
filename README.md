@@ -1,5 +1,8 @@
 # profs
 
+[![CI Status](https://github.com/GiGurra/profs/actions/workflows/ci.yml/badge.svg)](https://github.com/GiGurra/profs/actions/workflows/ci.yml)
+[![Go Report Card](https://goreportcard.com/badge/github.com/GiGurra/profs)](https://goreportcard.com/report/github.com/GiGurra/profs)
+
 `profs` is a CLI tool that lets you switch between different profiles for specified directories. 
 
 Use cases: 
