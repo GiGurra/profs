@@ -4,7 +4,7 @@ go 1.23.2
 
 require (
 	github.com/GiGurra/boa v0.1.4
-	github.com/samber/lo v1.49.1
+	github.com/samber/lo v1.50.0
 	github.com/spf13/cobra v1.9.1
 )
 
