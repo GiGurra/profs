@@ -16,17 +16,16 @@ func main() {
 
 	gc := LoadGlobalConf()
 
-	boa.Wrap{
+	boa.Cmd{
 		Use:   "profs",
 		Short: "Load user profile",
-		SubCommands: []*cobra.Command{
+		SubCmds: []*cobra.Command{
 			SetCmd(gc),
 			StatusCmd(gc),
 			StatusProfileCmd(gc),
 			FullStatusCmd(gc),
 		},
-	}.ToApp()
-
+	}.Run()
 }
 
 func simplifyPath(in string) string {
@@ -39,10 +38,10 @@ func simplifyPath(in string) string {
 }
 
 func StatusCmd(gc GlobalConfig) *cobra.Command {
-	return boa.Wrap{
+	return boa.Cmd{
 		Use:   "status",
 		Short: "Show current configuration",
-		Run: func(cmd *cobra.Command, args []string) {
+		RunFunc: func(cmd *cobra.Command, args []string) {
 			profileOf := func(p Path) string {
 				if p.ResolvedTgt != nil {
 					return p.ResolvedTgt.Name
@@ -80,14 +79,14 @@ func StatusCmd(gc GlobalConfig) *cobra.Command {
 				}
 			}
 		},
-	}.ToCmd()
+	}.ToCobra()
 }
 
 func StatusProfileCmd(gc GlobalConfig) *cobra.Command {
-	return boa.Wrap{
+	return boa.Cmd{
 		Use:   "status-profile",
 		Short: "Show current configuration",
-		Run: func(cmd *cobra.Command, args []string) {
+		RunFunc: func(cmd *cobra.Command, args []string) {
 			profileNames := gc.ActiveProfileNames()
 			if len(gc.ActiveProfileNames()) == 0 {
 				fmt.Println("No active profiles")
@@ -105,17 +104,17 @@ func StatusProfileCmd(gc GlobalConfig) *cobra.Command {
 				fmt.Println(" -> Run 'profs show-all' to see full configuration")
 			}
 		},
-	}.ToCmd()
+	}.ToCobra()
 }
 
 func FullStatusCmd(gc GlobalConfig) *cobra.Command {
-	return boa.Wrap{
+	return boa.Cmd{
 		Use:   "status-full",
 		Short: "Show full configuration and alternatives",
-		Run: func(cmd *cobra.Command, args []string) {
+		RunFunc: func(cmd *cobra.Command, args []string) {
 			fmt.Println(PrettyJson(gc))
 		},
-	}.ToCmd()
+	}.ToCobra()
 }
 
 func SetCmd(gc GlobalConfig) *cobra.Command {
@@ -126,13 +125,13 @@ func SetCmd(gc GlobalConfig) *cobra.Command {
 
 	params.Profile.SetAlternatives(gc.DetectedProfileNames())
 
-	return boa.Wrap{
+	return boa.Cmd{
 		Use:         "set",
 		Short:       "Set current profile",
 		Params:      &params,
 		ParamEnrich: boa.ParamEnricherDefault,
 		ValidArgs:   params.Profile.GetAlternatives(),
-		Run: func(cmd *cobra.Command, args []string) {
+		RunFunc: func(cmd *cobra.Command, args []string) {
 			if !lo.Contains(gc.DetectedProfileNames(), params.Profile.Value()) {
 				fmt.Println(fmt.Sprintf("Profile not found: %v", params.Profile.Value()))
 				fmt.Println("Available profiles:")
@@ -177,7 +176,7 @@ func SetCmd(gc GlobalConfig) *cobra.Command {
 				}
 			}
 		},
-	}.ToCmd()
+	}.ToCobra()
 }
 
 func HomeDir() string {
