@@ -21,8 +21,8 @@ func RemoveCmd(gc GlobalConfig) *cobra.Command {
 
 	return boa.Cmd{
 		Use:         "remove",
-		Short:       "Removes a new directory from profs config",
-		Long:        "Removes a new directory from profs config.\nNOTE: This does not remove symlinks or directories,\nit only removes the path from the profs configuration.",
+		Short:       "Removes a directory from profs config",
+		Long:        "Removes a directory from profs config.\nNOTE: This does not remove symlinks or directories,\nit only removes the path from the profs configuration.",
 		Params:      &params,
 		ParamEnrich: paramEnricherDefault,
 		ValidArgs:   alternatives,
