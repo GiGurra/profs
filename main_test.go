@@ -71,5 +71,10 @@ func TestHelp(t *testing.T) {
 func TestList(t *testing.T) {
 	runTest(t, []string{"profs", "list"}, func(t *testing.T, pan any, err error) {
 		checkNoFailures(t, pan, err)
+		// configs should be empty
+		conf := internal.LoadGlobalConf()
+		if conf.Paths != nil && len(conf.Paths) > 0 {
+			t.Fatalf("Expected no paths, got: %v", conf.Paths)
+		}
 	})
 }
