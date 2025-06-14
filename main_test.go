@@ -78,6 +78,23 @@ func TestAdd2(t *testing.T) {
 	})
 }
 
+func TestList2(t *testing.T) {
+	testDir := mkTempDir()
+	defer func() { deleteDirAndContents(testDir) }()
+
+	dirToAdd1 := mkDir(testDir, "dir1")
+	dirToAdd2 := mkDir(testDir, "dir2")
+	runTest(t, [][]string{
+		{"profs", "add", dirToAdd1, "--profile", "test"},
+		{"profs", "add", dirToAdd2},
+		{"profs", "list"},
+	}, func(t *testing.T, pan any, err error) {
+		checkNoFailures(t, pan, err)
+
+		// TODO: Capture stdout to verify output
+	})
+}
+
 func TestCantAddWithoutSpecifyingProfile(t *testing.T) {
 	testDir := mkTempDir()
 	defer func() { deleteDirAndContents(testDir) }()
