@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/GiGurra/boa/pkg/boa"
 	"github.com/samber/lo"
@@ -11,7 +12,7 @@ import (
 func StatusCmd(gc GlobalConfig) *cobra.Command {
 	return boa.Cmd{
 		Use:   "status",
-		Short: "Show current configuration",
+		Short: "Show current status",
 		RunFunc: func(cmd *cobra.Command, args []string) {
 			profileOf := func(p Path) string {
 				if p.ResolvedTgt != nil {
@@ -56,7 +57,7 @@ func StatusCmd(gc GlobalConfig) *cobra.Command {
 func StatusProfileCmd(gc GlobalConfig) *cobra.Command {
 	return boa.Cmd{
 		Use:   "status-profile",
-		Short: "Show current configuration",
+		Short: "Show current profile status",
 		RunFunc: func(cmd *cobra.Command, args []string) {
 			profileNames := gc.ActiveProfileNames()
 			if len(gc.ActiveProfileNames()) == 0 {
@@ -65,15 +66,37 @@ func StatusProfileCmd(gc GlobalConfig) *cobra.Command {
 				fmt.Println(profileNames[0])
 				if !gc.AllProfilesResolved() {
 					fmt.Println("WARNING: Not all configured profile resolved!")
-					fmt.Println(" -> Run 'profs status-all' to see full configuration")
+					fmt.Println(" -> Run 'profs status-all' to see full profile status")
 				}
 			} else {
 				fmt.Println("WARNING: Multiple active profiles:")
 				for _, p := range profileNames {
 					fmt.Println(fmt.Sprintf("  %v", p))
 				}
-				fmt.Println(" -> Run 'profs show-all' to see full configuration")
+				fmt.Println(" -> Run 'profs show-all' to see full profile status")
 			}
+		},
+	}.ToCobra()
+}
+
+func StatusRawCmd(gc GlobalConfig) *cobra.Command {
+	var params struct {
+		Raw bool `descr:"Show raw json config on disk" default:"false"`
+	}
+
+	return boa.Cmd{
+		Use:    "status-config",
+		Short:  "Show current raw configuration",
+		Params: &params,
+		RunFunc: func(cmd *cobra.Command, args []string) {
+			rawConf := LoadGlobalConfRaw()
+			bs, err := json.MarshalIndent(rawConf, "", "  ")
+			if err != nil {
+				fmt.Println("Error marshalling raw config:", err)
+				return
+			}
+
+			fmt.Println(string(bs))
 		},
 	}.ToCobra()
 }
@@ -81,7 +104,7 @@ func StatusProfileCmd(gc GlobalConfig) *cobra.Command {
 func FullStatusCmd(gc GlobalConfig) *cobra.Command {
 	return boa.Cmd{
 		Use:   "status-full",
-		Short: "Show full configuration and alternatives",
+		Short: "Show full status and alternatives",
 		RunFunc: func(cmd *cobra.Command, args []string) {
 			fmt.Println(PrettyJson(gc))
 		},

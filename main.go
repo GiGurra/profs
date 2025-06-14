@@ -20,6 +20,7 @@ func main() {
 			internal.ListProfilesCmd("list-profiles", gc),
 			internal.ResetCmd(gc),
 			internal.SetCmd(gc),
+			internal.StatusRawCmd(gc),
 			internal.StatusCmd(gc),
 			internal.StatusProfileCmd(gc),
 			internal.FullStatusCmd(gc),
