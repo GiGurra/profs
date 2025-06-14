@@ -24,13 +24,11 @@ func MigrateConfigDir(gc GlobalConfig) *cobra.Command {
 		RunFunc: func(cmd *cobra.Command, args []string) {
 
 			if !fileOrDirExists(legacyPath) {
-				fmt.Println("No legacy configuration found, nothing to migrate")
-				os.Exit(1)
+				ExitWithMsg(1, "No legacy configuration found at "+legacyPath+", nothing to migrate")
 			}
 
 			if fileOrDirExists(newPath) {
-				fmt.Println("New configuration directory already exists, please remove it before migrating")
-				os.Exit(1)
+				ExitWithMsg(1, "New configuration directory already exists at "+newPath+", please remove it before migrating")
 			}
 
 			if !params.Yes {
@@ -38,16 +36,14 @@ func MigrateConfigDir(gc GlobalConfig) *cobra.Command {
 					"Are you sure you want to migrate the configuration dir?\n" +
 						"from legacy " + legacyPath + " -> " + newPath,
 				) {
-					fmt.Println("Aborting migration")
-					os.Exit(0)
+					ExitWithMsg(0, "Aborting migration")
 				}
 			}
 
 			fmt.Printf("Migrating configuration from %s to %s\n", legacyPath, newPath)
 			err := os.Rename(legacyPath, newPath)
 			if err != nil {
-				fmt.Printf("Failed to migrate configuration: %v\n", err)
-				os.Exit(1)
+				ExitWithMsg(1, fmt.Sprintf("Failed to migrate configuration: %v", err))
 			}
 		},
 	}.ToCobra()

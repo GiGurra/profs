@@ -7,10 +7,15 @@ import (
 )
 
 func main() {
+	mainCmd().Run()
+}
+
+// For testability
+func mainCmd() *boa.Cmd {
 
 	gc := internal.LoadGlobalConf()
 
-	boa.Cmd{
+	return &boa.Cmd{
 		Use:   "profs",
 		Short: "Load user profile",
 		SubCmds: []*cobra.Command{
@@ -26,5 +31,5 @@ func main() {
 			internal.StatusProfileCmd(gc),
 			internal.FullStatusCmd(gc),
 		},
-	}.Run()
+	}
 }

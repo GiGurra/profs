@@ -5,8 +5,6 @@ import (
 	"github.com/GiGurra/boa/pkg/boa"
 	"github.com/samber/lo"
 	"github.com/spf13/cobra"
-	"log/slog"
-	"os"
 )
 
 func RemoveCmd(gc GlobalConfig) *cobra.Command {
@@ -29,14 +27,12 @@ func RemoveCmd(gc GlobalConfig) *cobra.Command {
 		RunFunc: func(cmd *cobra.Command, args []string) {
 
 			if !lo.Contains(rawConfig.Paths, params.Path) {
-				slog.Error("Path does not exist in configuration, aborting", "path", params.Path)
-				os.Exit(1)
+				ExitWithMsg(1, fmt.Sprintf("Path '%s' does not exist in profs configuration", params.Path))
 			}
 
 			if !params.Yes {
 				if !askForConfirmation("Are you sure you want to remove the path from profs configuration?") {
-					fmt.Printf("Aborting removal of path %s\n", params.Path)
-					os.Exit(1)
+					ExitWithMsg(0, "Aborting removal of path "+params.Path)
 				}
 			}
 

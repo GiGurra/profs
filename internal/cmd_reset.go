@@ -25,8 +25,7 @@ func ResetCmd(gc GlobalConfig) *cobra.Command {
 					"Are you sure you want to reset all configurations?\n" +
 						"This will reset the configuration to zero, but all symlinks will remain intact",
 				) {
-					fmt.Println("Aborting reset")
-					os.Exit(0)
+					ExitWithMsg(0, "Aborting reset")
 				}
 			}
 
@@ -39,8 +38,7 @@ func ResetCmd(gc GlobalConfig) *cobra.Command {
 			// delete the config directory
 			err := os.RemoveAll(configDir)
 			if err != nil {
-				fmt.Printf("Failed to reset configuration: %v\n", err)
-				os.Exit(1)
+				ExitWithMsg(1, fmt.Sprintf("Failed to reset configuration: %v", err))
 			}
 
 			// re-initialize the config directory
@@ -48,8 +46,7 @@ func ResetCmd(gc GlobalConfig) *cobra.Command {
 			fmt.Printf("Re-initializing configuration directory: %s\n", newConfigDir)
 			err = os.MkdirAll(newConfigDir, 0755)
 			if err != nil {
-				fmt.Printf("Failed to re-initialize configuration directory: %v\n", err)
-				os.Exit(1)
+				ExitWithMsg(1, fmt.Sprintf("Failed to create configuration directory: %v", err))
 			}
 		},
 	}.ToCobra()
