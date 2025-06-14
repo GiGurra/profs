@@ -152,10 +152,10 @@ func runTest(
 
 func checkNoFailures(t *testing.T, pan any, err error) {
 	if err != nil {
-		t.Fatalf("Expected no error, got panic: %v", err)
+		t.Fatalf("Expected no error, got error: %v", err)
 	}
 	if pan != nil {
-		t.Fatalf("Expected no panic, got error: %v", pan)
+		t.Fatalf("Expected no panic, got panic: %v", pan)
 	}
 }
 
