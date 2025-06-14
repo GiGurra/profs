@@ -3,12 +3,13 @@
 [![CI Status](https://github.com/GiGurra/profs/actions/workflows/ci.yml/badge.svg)](https://github.com/GiGurra/profs/actions/workflows/ci.yml)
 [![Go Report Card](https://goreportcard.com/badge/github.com/GiGurra/profs)](https://goreportcard.com/report/github.com/GiGurra/profs)
 
-`profs` is a CLI tool that lets you switch between different profiles for specified directories. 
+`profs` is a CLI tool that lets you switch between different profiles for specified directories.
 
-Use cases: 
-  * `work` vs `personal` ssh+git config
-  * `customer1` vs `customer2` vs `customer3` cloud config
-  * etc
+Use cases:
+
+* `work` vs `personal` ssh+git config
+* `customer1` vs `customer2` vs `customer3` cloud config
+* etc
 
 The idea is to be able to quickly switch profiles without necessarily having to use different computer accounts.
 
@@ -117,8 +118,8 @@ This command displays detailed information about all configured paths and detect
 
 ## Configuration
 
-The tool uses a configuration file located at `~/.profs/global.json`. This file should contain a JSON object with a
-`paths` array specifying the directories/files to manage.
+The tool uses a configuration file located at `~/.config/gigurra/profs/global.json`.
+This file should contain a JSON object with a `paths` array specifying the directories/files to manage.
 
 Example configuration:
 
