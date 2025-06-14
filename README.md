@@ -95,7 +95,11 @@ To view the current status:
 
 ```
 > profs status
-personal
+Profile: personal
+  ~/.ssh           -> ~/.ssh.profs/personal [ok]
+  ~/.config/gh     -> ~/.config/gh.profs/personal [ok]
+  ~/.config/gcloud -> ~/.config/gcloud.profs/personal [ok]
+  ~/.gitconfig     -> ~/.gitconfig.profs/personal [ok]
 ```
 
 This will show the active profile(s) or indicate if no profiles are active.
@@ -106,7 +110,7 @@ To view the full configuration and alternatives:
 
 ```
 > profs status-full
-<<LOTS-OF-PRETTY-JSON>>
+<<LOTS-OF-STUFF>>
 ```
 
 This command displays detailed information about all configured paths and detected profiles.
