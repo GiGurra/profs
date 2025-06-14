@@ -12,6 +12,17 @@ import (
 	"strings"
 )
 
+var TestMode = false
+
+func ExitWithMsg(code int, msg string) {
+	if TestMode {
+		panic("ExitWithMsg called in test mode, code: " + fmt.Sprint(code) + ", msg: " + msg)
+	} else {
+		fmt.Println(msg)
+		os.Exit(code)
+	}
+}
+
 func PrettyJson[T any](t T) string {
 	bytes, err := json.MarshalIndent(t, "", "  ")
 	if err != nil {

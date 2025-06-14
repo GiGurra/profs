@@ -24,12 +24,11 @@ func SetCmd(gc GlobalConfig) *cobra.Command {
 		ValidArgs:   params.Profile.GetAlternatives(),
 		RunFunc: func(cmd *cobra.Command, args []string) {
 			if !lo.Contains(gc.DetectedProfileNames(), params.Profile.Value()) {
-				fmt.Printf("Profile not found: %v\n", params.Profile.Value())
 				fmt.Println("Available profiles:")
 				for _, p := range gc.DetectedProfileNames() {
 					fmt.Printf("  %v\n", p)
 				}
-				os.Exit(1)
+				ExitWithMsg(1, fmt.Sprintf("Profile '%s' not found", params.Profile.Value()))
 			}
 
 			for _, p := range gc.Paths {
@@ -49,21 +48,21 @@ func SetCmd(gc GlobalConfig) *cobra.Command {
 				}
 
 				if fileOrDirExists(p.SrcPath) && !isSymlink(p.SrcPath) {
-					panic(fmt.Sprintf("SrcPath is not a symlink: %v", p.SrcPath))
+					ExitWithMsg(1, fmt.Sprintf("Path %s already exists and is not a symlink, please remove it before setting the profile", p.SrcPath))
 				}
 
 				// remove existing symlink
 				if fileOrDirExists(p.SrcPath) {
 					err := os.Remove(p.SrcPath)
 					if err != nil {
-						panic(fmt.Sprintf("Failed to remove existing symlink: %v", err))
+						ExitWithMsg(1, fmt.Sprintf("Failed to remove existing symlink: %v", err))
 					}
 				}
 
 				// create new symlink
 				err := os.Symlink(tgt.Path, p.SrcPath)
 				if err != nil {
-					panic(fmt.Sprintf("Failed to create symlink: %v", err))
+					ExitWithMsg(1, fmt.Sprintf("Failed to create symlink for profile %s: %v", params.Profile.Value(), err))
 				}
 			}
 		},

@@ -161,6 +161,9 @@ func ConfigDir() string {
 
 func GlobalConfigPath() string {
 	filePath := filepath.Join(ConfigDir(), "global.json")
+	if TestMode {
+		filePath = filepath.Join(ConfigDir(), "global.test.json")
+	}
 	// check that file exists
 	if _, err := os.Stat(filePath); os.IsNotExist(err) {
 		// create a blank config and save it
