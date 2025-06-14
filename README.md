@@ -51,11 +51,19 @@ Usage:
   profs [command]
 
 Available Commands:
-  completion  Generate the autocompletion script for the specified shell
-  help        Help about any command
-  set         Set current profile
-  status      Show current configuration
-  status-full Show full configuration and alternatives
+  add                Adds a new directory to be managed by profs
+  completion         Generate the autocompletion script for the specified shell
+  help               Help about any command
+  list               Lists all detected profiles
+  list-profiles      Lists all detected profiles
+  migrate-config-dir Migrate legacy /home/johkjo/.profs -> /home/johkjo/.config/gigurra/profs
+  remove             Removes a directory from profs config
+  reset              Resets all configuration to zero
+  set                Set current profile
+  status             Show current status
+  status-config      Show current raw configuration
+  status-full        Show full status and alternatives
+  status-profile     Show current profile status
 
 Flags:
   -h, --help   help for profs
