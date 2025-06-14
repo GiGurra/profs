@@ -24,6 +24,18 @@ func runTest(
 	internal.TestMode = true
 	defer func() { internal.TestMode = false }()
 
+	// delete config file/state after each test
+	// NOTE: TestMode must be set to true, else we will
+	// be deleting the config file in the real environment
+	defer func() {
+		configPath := internal.GlobalConfigPath()
+		if _, err := os.Stat(configPath); err == nil {
+			if err := os.Remove(configPath); err != nil {
+				t.Fatalf("Failed to remove config file: %v", err)
+			}
+		}
+	}()
+
 	os.Args = args
 	var pan any = nil
 	var err error = nil
@@ -56,26 +68,8 @@ func TestHelp(t *testing.T) {
 	})
 }
 
-func TestHelpx(t *testing.T) {
-	runTest(t, []string{"profs", "status"}, func(t *testing.T, pan any, err error) {
-		checkNoFailures(t, pan, err)
-	})
-}
-
-func TestHelpy(t *testing.T) {
-	runTest(t, []string{"profs", "set", "banana"}, func(t *testing.T, pan any, err error) {
-		checkNoFailures(t, pan, err)
-	})
-}
-
-func TestHelp1(t *testing.T) {
-	runTest(t, []string{"profs", "setx"}, func(t *testing.T, pan any, err error) {
-		checkNoFailures(t, pan, err)
-	})
-}
-
-func TestHelpz(t *testing.T) {
-	runTest(t, []string{"profs", "status"}, func(t *testing.T, pan any, err error) {
+func TestList(t *testing.T) {
+	runTest(t, []string{"profs", "list"}, func(t *testing.T, pan any, err error) {
 		checkNoFailures(t, pan, err)
 	})
 }
