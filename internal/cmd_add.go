@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 func AddCmd(gc GlobalConfig) *cobra.Command {
@@ -38,26 +39,55 @@ func AddCmd(gc GlobalConfig) *cobra.Command {
 				}
 			}
 
+			// check if it under the current user's home directory
+			homeDir, err := os.UserHomeDir()
+			if err != nil {
+				slog.Error("Failed to get user home directory", "error", err)
+				os.Exit(1)
+			}
+
+			// check that the path is absolute
+			path := params.Path
+			if !filepath.IsAbs(path) {
+				path, err = filepath.Abs(path)
+				if err != nil {
+					slog.Error("Failed to get absolute path", "path", path, "error", err)
+					os.Exit(1)
+				}
+			}
+
 			rawConfig := LoadGlobalConfRaw()
-			if lo.Contains(rawConfig.Paths, params.Path) {
-				slog.Error("Path already exists in configuration, aborting", "path", params.Path)
+			if lo.ContainsBy(rawConfig.Paths, func(item string) bool {
+				a, err := filepath.Abs(item)
+				if err != nil {
+					slog.Error("Failed to get absolute path", "path", item, "error", err)
+					os.Exit(1)
+				}
+				b, err := filepath.Abs(path)
+				if err != nil {
+					slog.Error("Failed to get absolute path", "path", path, "error", err)
+					os.Exit(1)
+				}
+				return a == b
+			}) {
+				slog.Error("Path already exists in configuration, aborting", "path", path)
 				os.Exit(1)
 			}
 
 			// create a .profs directory if it doesn't exist
-			profsDir := params.Path + ".profs"
-			err := os.MkdirAll(profsDir, 0755)
+			profsDir := path + ".profs"
+			err = os.MkdirAll(profsDir, 0755)
 			if err != nil {
 				slog.Error("Failed to create .profs directory", "path", profsDir, "error", err)
 				os.Exit(1)
 			}
 
 			// Check if the path is already managed, i.e. is a symlink
-			if isSymlink(params.Path) {
+			if isSymlink(path) {
 				// Check fi it points to a profile in the .profs directory
-				target, err := os.Readlink(params.Path)
+				target, err := os.Readlink(path)
 				if err != nil {
-					slog.Error("Failed to read symlink", "link", params.Path, "error", err)
+					slog.Error("Failed to read symlink", "link", path, "error", err)
 					os.Exit(1)
 				}
 
@@ -67,10 +97,10 @@ func AddCmd(gc GlobalConfig) *cobra.Command {
 					os.Exit(1)
 				}
 				if parentOfTarget == profsDir {
-					slog.Warn("Path is already a symlink managed by profs (=is a symlink), skipping", "path", params.Path)
+					slog.Warn("Path is already a symlink managed by profs (=is a symlink), skipping", "path", path)
 				} else {
 					slog.Error("Path is already a symlink, but doesn't look to be managed by profs, aborting",
-						"path", params.Path,
+						"path", path,
 						"parentOfTarget", parentOfTarget,
 						"expectedParent", profsDir,
 					)
@@ -83,18 +113,18 @@ func AddCmd(gc GlobalConfig) *cobra.Command {
 				if !fileOrDirExists(newPath) {
 
 					// Check that the path exists
-					if !fileOrDirExists(params.Path) {
-						slog.Warn("Path to add does not exist, creating it", "path", params.Path)
-						err := os.MkdirAll(params.Path, 0755)
+					if !fileOrDirExists(path) {
+						slog.Warn("Path to add does not exist, creating it", "path", path)
+						err := os.MkdirAll(path, 0755)
 						if err != nil {
-							slog.Error("Failed to create path", "path", params.Path, "error", err)
+							slog.Error("Failed to create path", "path", path, "error", err)
 							os.Exit(1)
 						}
 					}
 
-					err = os.Rename(params.Path, newPath)
+					err = os.Rename(path, newPath)
 					if err != nil {
-						slog.Error("Failed to move existing directory to .profs", "oldPath", params.Path, "newPath", newPath, "error", err)
+						slog.Error("Failed to move existing directory to .profs", "oldPath", path, "newPath", newPath, "error", err)
 						os.Exit(1)
 					}
 				} else {
@@ -102,16 +132,20 @@ func AddCmd(gc GlobalConfig) *cobra.Command {
 				}
 
 				// Create a symlink from the new path to the original path
-				err = os.Symlink(newPath, params.Path)
+				err = os.Symlink(newPath, path)
 				if err != nil {
-					slog.Error("Failed to create symlink", "target", newPath, "link", params.Path, "error", err)
+					slog.Error("Failed to create symlink", "target", newPath, "link", path, "error", err)
 					os.Exit(1)
 				}
 
 			}
 
 			// Add the new path to the configuration file
-			rawConfig.Paths = append(rawConfig.Paths, params.Path)
+			storedPath := path
+			if strings.HasPrefix(storedPath, homeDir) {
+				storedPath = strings.ReplaceAll(storedPath, homeDir, "~")
+			}
+			rawConfig.Paths = append(rawConfig.Paths, storedPath)
 			SaveGlobalConfRaw(rawConfig)
 
 		},
