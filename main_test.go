@@ -78,6 +78,18 @@ func TestAdd2(t *testing.T) {
 	})
 }
 
+func TestCantAddWithoutSpecifyingProfile(t *testing.T) {
+	testDir := mkTempDir()
+	defer func() { deleteDirAndContents(testDir) }()
+
+	dirToAdd1 := mkDir(testDir, "dir1")
+	runTest(t, [][]string{
+		{"profs", "add", dirToAdd1},
+	}, func(t *testing.T, pan any, err error) {
+		expectPanic(t, pan, err, "No active profile found and no profile specified. Don't know how to add path.")
+	})
+}
+
 func TestSetNonExistingProfile(t *testing.T) {
 	testDir := mkTempDir()
 	defer func() { deleteDirAndContents(testDir) }()
@@ -87,20 +99,36 @@ func TestSetNonExistingProfile(t *testing.T) {
 		{"profs", "add", dirToAdd1, "--profile", "test"},
 		{"profs", "set", "testx"},
 	}, func(t *testing.T, pan any, err error) {
-		if pan == nil {
-			t.Fatal("Expected a panic when setting a non-existing profile, got none")
-		}
-		if err != nil {
-			t.Fatalf("Expected no error, got: %v", err)
-		}
-
-		expMsg := "Profile 'testx' not found"
-		errMsg := fmt.Sprintf("%v", pan)
-
-		if !strings.Contains(errMsg, expMsg) {
-			t.Fatalf("Expected panic message to contain '%s', got: %s", expMsg, errMsg)
-		}
+		expectPanic(t, pan, err, "Profile 'testx' not found")
 	})
+}
+
+func expectPanic(t *testing.T, pan any, err error, expectedMsg string) {
+	if err != nil {
+		t.Fatalf("Expected no error, got: %v", err)
+	}
+	if pan == nil {
+		t.Fatal("Expected a panic, got none")
+	}
+
+	errMsg := fmt.Sprintf("%v", pan)
+	if !strings.Contains(errMsg, expectedMsg) {
+		t.Fatalf("Expected panic message to contain '%s', got: %s", expectedMsg, errMsg)
+	}
+}
+
+func expectError(t *testing.T, pan any, err error, expectedMsg string) {
+	if pan != nil {
+		t.Fatalf("Expected no panic, got: %v", pan)
+	}
+	if err == nil {
+		t.Fatal("Expected an error, got none")
+	}
+
+	errMsg := err.Error()
+	if !strings.Contains(errMsg, expectedMsg) {
+		t.Fatalf("Expected error message to contain '%s', got: %s", expectedMsg, errMsg)
+	}
 }
 
 var testMutex = sync.Mutex{}
