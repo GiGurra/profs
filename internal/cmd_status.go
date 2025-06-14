@@ -47,7 +47,7 @@ func StatusCmd(gc GlobalConfig) *cobra.Command {
 					if p.TgtPath != nil {
 						infoStr = infoStr + simplifyPath(*p.TgtPath) + " [" + string(p.Status) + "]"
 					}
-					fmt.Println(fmt.Sprintf("  %v -> %v", src, infoStr))
+					fmt.Printf("  %v -> %v\n", src, infoStr)
 				}
 			}
 		},
@@ -71,7 +71,7 @@ func StatusProfileCmd(gc GlobalConfig) *cobra.Command {
 			} else {
 				fmt.Println("WARNING: Multiple active profiles:")
 				for _, p := range profileNames {
-					fmt.Println(fmt.Sprintf("  %v", p))
+					fmt.Printf("  %v\n", p)
 				}
 				fmt.Println(" -> Run 'profs show-all' to see full profile status")
 			}

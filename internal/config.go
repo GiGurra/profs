@@ -90,7 +90,7 @@ func LoadGlobalConf() GlobalConfig {
 				}
 			}()
 			detectedProfs := profsOnPath(symSrcPath + ".profs")
-			status := StatusErrorSrcNotFound
+			var status Status
 			var resolvedTgt *DetectedProfile = nil
 			var target *string = nil
 

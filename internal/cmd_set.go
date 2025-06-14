@@ -24,10 +24,10 @@ func SetCmd(gc GlobalConfig) *cobra.Command {
 		ValidArgs:   params.Profile.GetAlternatives(),
 		RunFunc: func(cmd *cobra.Command, args []string) {
 			if !lo.Contains(gc.DetectedProfileNames(), params.Profile.Value()) {
-				fmt.Println(fmt.Sprintf("Profile not found: %v", params.Profile.Value()))
+				fmt.Printf("Profile not found: %v\n", params.Profile.Value())
 				fmt.Println("Available profiles:")
 				for _, p := range gc.DetectedProfileNames() {
-					fmt.Println(fmt.Sprintf("  %v", p))
+					fmt.Printf("  %v\n", p)
 				}
 				os.Exit(1)
 			}
