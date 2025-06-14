@@ -16,6 +16,7 @@ func main() {
 		SubCmds: []*cobra.Command{
 			internal.MigrateConfigDir(gc),
 			internal.AddCmd(gc),
+			internal.RemoveCmd(gc),
 			internal.ListProfilesCmd("list", gc),
 			internal.ListProfilesCmd("list-profiles", gc),
 			internal.ResetCmd(gc),

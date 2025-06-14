@@ -6,6 +6,7 @@ import (
 	"github.com/spf13/cobra"
 	"log/slog"
 	"os"
+	"path/filepath"
 )
 
 func AddCmd(gc GlobalConfig) *cobra.Command {
@@ -53,12 +54,6 @@ func AddCmd(gc GlobalConfig) *cobra.Command {
 				}
 			}
 
-			// Check if the path is already managed, i.e. is a symlink
-			if isSymlink(params.Path) {
-				slog.Error("Path is already managed by profs (=is a symlink), skipping", "path", params.Path)
-				os.Exit(1)
-			}
-
 			// create a .profs directory if it doesn't exist
 			profsDir := params.Path + ".profs"
 			err := os.MkdirAll(profsDir, 0755)
@@ -67,19 +62,39 @@ func AddCmd(gc GlobalConfig) *cobra.Command {
 				os.Exit(1)
 			}
 
-			// Move the existing directory to .profs, and rename it to the profile name
-			newPath := profsDir + "/" + profileName
-			err = os.Rename(params.Path, newPath)
-			if err != nil {
-				slog.Error("Failed to move existing directory to .profs", "oldPath", params.Path, "newPath", newPath, "error", err)
-				os.Exit(1)
-			}
+			// Check if the path is already managed, i.e. is a symlink
+			if isSymlink(params.Path) {
+				// Check fi it points to a profile in the .profs directory
+				target, err := os.Readlink(params.Path)
+				if err != nil {
+					slog.Error("Failed to read symlink", "link", params.Path, "error", err)
+					os.Exit(1)
+				}
 
-			// Create a symlink from the new path to the original path
-			err = os.Symlink(newPath, params.Path)
-			if err != nil {
-				slog.Error("Failed to create symlink", "target", newPath, "link", params.Path, "error", err)
-				os.Exit(1)
+				parentOfTarget := filepath.Dir(target)
+				if parentOfTarget == profsDir {
+					slog.Warn("Path is already a symlink managed by profs (=is a symlink), skipping", "path", params.Path)
+				} else {
+					slog.Error("Path is already a symlink, but doesn't look to be managed by profs, aborting", "path", params.Path)
+					os.Exit(1)
+				}
+			} else {
+
+				// Move the existing directory to .profs, and rename it to the profile name
+				newPath := profsDir + "/" + profileName
+				err = os.Rename(params.Path, newPath)
+				if err != nil {
+					slog.Error("Failed to move existing directory to .profs", "oldPath", params.Path, "newPath", newPath, "error", err)
+					os.Exit(1)
+				}
+
+				// Create a symlink from the new path to the original path
+				err = os.Symlink(newPath, params.Path)
+				if err != nil {
+					slog.Error("Failed to create symlink", "target", newPath, "link", params.Path, "error", err)
+					os.Exit(1)
+				}
+
 			}
 
 			// Add the new path to the configuration file
