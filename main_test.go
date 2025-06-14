@@ -1,12 +1,14 @@
 package main
 
 import (
+	"fmt"
 	"github.com/GiGurra/boa/pkg/boa"
 	"github.com/GiGurra/profs/internal"
 	"github.com/google/go-cmp/cmp"
 	"github.com/samber/lo"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 	"testing"
 )
@@ -139,7 +141,8 @@ func TestAdd2(t *testing.T) {
 	dirToAdd2 := mkDir(testDir, "dir2")
 	runTest(t, [][]string{
 		{"profs", "add", dirToAdd1, "--profile", "test"},
-		{"profs", "add", dirToAdd2, "--profile", "test"},
+		{"profs", "add", dirToAdd2},
+		{"profs", "set", "test"},
 	}, func(t *testing.T, pan any, err error) {
 		checkNoFailures(t, pan, err)
 
@@ -154,6 +157,31 @@ func TestAdd2(t *testing.T) {
 			return item.SrcPath
 		}), expected); diff != "" {
 			t.Fatalf("Paths mismatch (-got +want):\n%s", diff)
+		}
+	})
+}
+
+func TestSetNonExistingProfile(t *testing.T) {
+	testDir := mkTempDir()
+	defer func() { deleteDirAndContents(testDir) }()
+
+	dirToAdd1 := mkDir(testDir, "dir1")
+	runTest(t, [][]string{
+		{"profs", "add", dirToAdd1, "--profile", "test"},
+		{"profs", "set", "testx"},
+	}, func(t *testing.T, pan any, err error) {
+		if pan == nil {
+			t.Fatal("Expected a panic when setting a non-existing profile, got none")
+		}
+		if err != nil {
+			t.Fatalf("Expected no error, got: %v", err)
+		}
+
+		expMsg := "Profile 'testx' not found"
+		errMsg := fmt.Sprintf("%v", pan)
+
+		if !strings.Contains(errMsg, expMsg) {
+			t.Fatalf("Expected panic message to contain '%s', got: %s", expMsg, errMsg)
 		}
 	})
 }
