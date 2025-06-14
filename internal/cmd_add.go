@@ -44,16 +44,6 @@ func AddCmd(gc GlobalConfig) *cobra.Command {
 				os.Exit(1)
 			}
 
-			// Check that the path exists
-			if !fileOrDirExists(params.Path) {
-				slog.Warn("Path to add does not exist, creating it", "path", params.Path)
-				err := os.MkdirAll(params.Path, 0755)
-				if err != nil {
-					slog.Error("Failed to create path", "path", params.Path, "error", err)
-					os.Exit(1)
-				}
-			}
-
 			// create a .profs directory if it doesn't exist
 			profsDir := params.Path + ".profs"
 			err := os.MkdirAll(profsDir, 0755)
@@ -71,21 +61,44 @@ func AddCmd(gc GlobalConfig) *cobra.Command {
 					os.Exit(1)
 				}
 
-				parentOfTarget := filepath.Dir(target)
+				parentOfTarget, err := filepath.Abs(filepath.Dir(target))
+				if err != nil {
+					slog.Error("Failed to get parent directory of symlink target", "target", target, "error", err)
+					os.Exit(1)
+				}
 				if parentOfTarget == profsDir {
 					slog.Warn("Path is already a symlink managed by profs (=is a symlink), skipping", "path", params.Path)
 				} else {
-					slog.Error("Path is already a symlink, but doesn't look to be managed by profs, aborting", "path", params.Path)
+					slog.Error("Path is already a symlink, but doesn't look to be managed by profs, aborting",
+						"path", params.Path,
+						"parentOfTarget", parentOfTarget,
+						"expectedParent", profsDir,
+					)
 					os.Exit(1)
 				}
 			} else {
 
 				// Move the existing directory to .profs, and rename it to the profile name
 				newPath := profsDir + "/" + profileName
-				err = os.Rename(params.Path, newPath)
-				if err != nil {
-					slog.Error("Failed to move existing directory to .profs", "oldPath", params.Path, "newPath", newPath, "error", err)
-					os.Exit(1)
+				if !fileOrDirExists(newPath) {
+
+					// Check that the path exists
+					if !fileOrDirExists(params.Path) {
+						slog.Warn("Path to add does not exist, creating it", "path", params.Path)
+						err := os.MkdirAll(params.Path, 0755)
+						if err != nil {
+							slog.Error("Failed to create path", "path", params.Path, "error", err)
+							os.Exit(1)
+						}
+					}
+
+					err = os.Rename(params.Path, newPath)
+					if err != nil {
+						slog.Error("Failed to move existing directory to .profs", "oldPath", params.Path, "newPath", newPath, "error", err)
+						os.Exit(1)
+					}
+				} else {
+					slog.Warn("Path already exists in .profs, skipping move", "path", newPath)
 				}
 
 				// Create a symlink from the new path to the original path
