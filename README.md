@@ -52,6 +52,10 @@ Example structure:
 ```
 ~/.gitconfig -> ~/.gitconfig.profs/work
 ~/.gitconfig.profs/
+├── work
+└── personal
+~/.ssh -> ~/.ssh.profs/work
+~/.ssh.profs/
 ├── work/
 └── personal/
 ```
