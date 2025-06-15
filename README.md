@@ -45,7 +45,15 @@ mise use -g "go:github.com/GiGurra/profs@latest"
 
 4. Check current status:
    ```bash
-   profs status
+   > profs status
+   Profile: personal
+   ~/.config/gigurra/ai     -> ~/.config/gigurra/ai.profs/personal [ok]
+   ~/.config/gh             -> ~/.config/gh.profs/personal [ok]
+   ~/.ssh                   -> ~/.ssh.profs/personal [ok]
+   ~/.kube                  -> ~/.kube.profs/personal [ok]
+   ~/.gitconfig             -> ~/.gitconfig.profs/personal [ok]
+   ~/.config/github-copilot -> ~/.config/github-copilot.profs/personal [ok]
+   ~/.config/gcloud         -> ~/.config/gcloud.profs/personal [ok]
    ```
 
 ## How it works
