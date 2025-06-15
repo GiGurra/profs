@@ -56,13 +56,16 @@ func RemoveProfileCmd(gc GlobalConfig) *cobra.Command {
 				profileDir := filepath.Join(profsDir, params.Name)
 
 				if !fileOrDirExists(profileDir) {
-					ExitWithMsg(1, fmt.Sprintf("Profile '%s' does not exist in path '%s'", params.Name, path.SrcPath))
+					fmt.Printf("Profile '%s' does not exist in path '%s', skipping\n", params.Name, path.SrcPath)
+					continue
 				}
 
 				err = os.RemoveAll(profileDir)
 				if err != nil {
 					ExitWithMsg(1, fmt.Sprintf("Failed to remove profile directory '%s' in path '%s': %v", profileDir, path.SrcPath, err))
 				}
+
+				fmt.Printf("Removed profile '%s' from path '%s'\n", params.Name, path.SrcPath)
 			}
 		},
 	}.ToCobra()
