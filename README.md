@@ -19,7 +19,7 @@ For example:
 go install github.com/GiGurra/profs@latest
 ```
 
-or if you prefer a tool manager like `mise`, you can use:
+or if you prefer a tool manager like [mise](https://github.com/jdx/mise), you can use:
 
 ```bash
 mise use -g "go:github.com/GiGurra/profs@latest"
