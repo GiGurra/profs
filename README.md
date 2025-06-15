@@ -7,9 +7,11 @@ A CLI tool for managing different configuration profiles by switching symlinks b
 
 ## What it does
 
-`profs` helps you manage multiple configuration profiles for different contexts (work vs personal, different clients, etc.) by organizing them into `.profs` companion directories and using symlinks to switch between them.
+`profs` helps you manage multiple configuration profiles for different contexts (work vs personal, different clients,
+etc.) by organizing them into `.profs` companion directories and using symlinks to switch between them.
 
 For example:
+
 - `~/.gitconfig` → `~/.gitconfig.profs/work` or `~/.gitconfig.profs/personal`
 - `~/.ssh` → `~/.ssh.profs/client1` or `~/.ssh.profs/client2`
 
@@ -31,6 +33,9 @@ mise use -g "go:github.com/GiGurra/profs@latest"
    ```bash
    profs add ~/.gitconfig --profile work
    ```
+   The `--profile work` is only required the first time you add a path.
+   It creates a new profile named "work" and sets up the symlink. For subsequent additions,
+   you can omit the profile flag, and it will then use the current profile.
 
 2. Add another profile:
    ```bash
@@ -63,6 +68,7 @@ mise use -g "go:github.com/GiGurra/profs@latest"
 - Switching profiles updates all symlinks simultaneously
 
 Example structure:
+
 ```
 ~/.gitconfig -> ~/.gitconfig.profs/work
 ~/.gitconfig.profs/
@@ -92,6 +98,7 @@ Configuration is stored at `~/.config/gigurra/profs/global.json` and contains th
 ## Shell Completion
 
 Generate completion scripts:
+
 ```bash
 profs completion bash|zsh|fish|powershell
 ```
