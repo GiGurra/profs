@@ -7,7 +7,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func RemoveCmd(gc GlobalConfig) *cobra.Command {
+func RemoveCmd(cmdName string, gc GlobalConfig) *cobra.Command {
 
 	var params struct {
 		Path string `positional:"true" description:"Path to add"`
@@ -18,7 +18,7 @@ func RemoveCmd(gc GlobalConfig) *cobra.Command {
 	alternatives := rawConfig.Paths
 
 	return boa.Cmd{
-		Use:         "remove",
+		Use:         cmdName,
 		Short:       "Removes a directory from profs config",
 		Long:        "Removes a directory from profs config.\nNOTE: This does not remove symlinks or directories,\nit only removes the path from the profs configuration.",
 		Params:      &params,
