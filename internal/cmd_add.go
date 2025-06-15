@@ -134,6 +134,22 @@ func AddCmd(cmdName string, gc GlobalConfig) *cobra.Command {
 
 			}
 
+			// create directories for all other profiles that we have
+			profiles := gc.DetectedProfileNames()
+			for _, profile := range profiles {
+				if profile == profileName {
+					continue // skip the profile we just added
+				}
+
+				profilePath := filepath.Join(profsDir, profile)
+				if !fileOrDirExists(profilePath) {
+					err = os.MkdirAll(profilePath, 0755)
+					if err != nil {
+						ExitWithMsg(1, fmt.Sprintf("Failed to create profile directory '%s', error: %v", profilePath, err))
+					}
+				}
+			}
+
 			// Add the new path to the configuration file
 			storedPath := path
 			if strings.HasPrefix(storedPath, homeDir) {
