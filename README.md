@@ -46,19 +46,23 @@ Bring up the help:
 
 ```
 > profs --help
-Load user profile
+Manage user profiles
 
 Usage:
   profs [command]
 
 Available Commands:
   add                Adds a new directory to be managed by profs
+  add-path           Adds a new directory to be managed by profs
+  add-profile        Adds a new profile to be managed by profs
   completion         Generate the autocompletion script for the specified shell
   help               Help about any command
   list               Lists all detected profiles
   list-profiles      Lists all detected profiles
-  migrate-config-dir Migrate legacy /home/johkjo/.profs -> /home/johkjo/.config/gigurra/profs
+  migrate-config-dir Migrate legacy /Users/johkjo/.profs -> /Users/johkjo/.config/gigurra/profs
   remove             Removes a directory from profs config
+  remove-path        Removes a directory from profs config
+  remove-profile     Removes an existing profile managed by profs
   reset              Resets all configuration to zero
   set                Set current profile
   status             Show current status

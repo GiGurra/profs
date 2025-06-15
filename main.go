@@ -17,7 +17,7 @@ func mainCmd() *boa.Cmd {
 
 	return &boa.Cmd{
 		Use:   "profs",
-		Short: "Load user profile",
+		Short: "Manage user profiles",
 		SubCmds: []*cobra.Command{
 			internal.MigrateConfigDir(gc),
 			internal.AddCmd("add", gc),
