@@ -10,12 +10,13 @@ import (
 func DoctorCmd(gc GlobalConfig) *cobra.Command {
 
 	var params struct {
-		RepairMode string `descr:"Repair mode, currently just 'all', to be expanded in the future" default:""`
+		// TODO: Implement repair mode in the future
+		//RepairMode string `descr:"Repair mode, currently just 'all', to be expanded in the future" default:""`
 	}
 
 	return boa.Cmd{
 		Use:         "doctor",
-		Short:       "Show inconsistencies in the current configuration and optional repair them",
+		Short:       "Show inconsistencies in the current configuration",
 		Params:      &params,
 		ParamEnrich: paramEnricherDefault,
 		RunFunc: func(cmd *cobra.Command, args []string) {

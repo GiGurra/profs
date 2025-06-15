@@ -56,6 +56,7 @@ Available Commands:
   add-path           Adds a new directory to be managed by profs
   add-profile        Adds a new profile to be managed by profs
   completion         Generate the autocompletion script for the specified shell
+  doctor             Show inconsistencies in the current configuration
   help               Help about any command
   list               Lists all detected profiles
   list-profiles      Lists all detected profiles
