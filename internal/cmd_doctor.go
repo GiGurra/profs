@@ -38,7 +38,7 @@ func DoctorCmd(gc GlobalConfig) *cobra.Command {
 				ExitWithMsg(1, fmt.Sprintf("Multiple active profiles detected (%d), expected only one active profile. Please deactivate all but one profile", len(activeProfileNames)))
 			}
 
-			activeProfileName := activeProfileNames[0]
+			globallyActiveProfile := activeProfileNames[0]
 
 			numWarnings := 0
 			for _, path := range gc.Paths {
@@ -52,14 +52,14 @@ func DoctorCmd(gc GlobalConfig) *cobra.Command {
 					continue
 				}
 
-				activeProfile, err := path.ActiveProfile()
+				dirActiveProfile, err := path.ActiveProfile()
 				if err != nil {
 					// TODO: Implement fix/repair operation
 					fmt.Printf(" * WARN * Error getting active profile for path %s: %v\n", path.SrcPath, err)
 					numWarnings++
-				} else if activeProfile != activeProfileName {
+				} else if dirActiveProfile != globallyActiveProfile {
 					// TODO: Implement fix/repair operation
-					fmt.Printf(" * WARN * Active profile for path %s is '%s', expected '%s'.\n", path.SrcPath, activeProfile, activeProfileName)
+					fmt.Printf(" * WARN * Active profile for path %s is '%s', expected '%s'.\n", path.SrcPath, dirActiveProfile, globallyActiveProfile)
 					numWarnings++
 				}
 
