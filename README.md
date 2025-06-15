@@ -19,6 +19,12 @@ For example:
 go install github.com/GiGurra/profs@latest
 ```
 
+or if you prefer a tool manager like `mise`, you can use:
+
+```bash
+mise use "go:github.com/GiGurra/profs@latest"
+```
+
 ## Quick Start
 
 1. Add a directory to be managed:
