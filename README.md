@@ -44,7 +44,6 @@ mise use -g "go:github.com/GiGurra/profs@latest"
    By default, this creates new empty directories for the new profile at all paths managed by `profs`.
    You can change this behavior by using the `--copy-existing` flag to copy the current profile's 
    contents into the new profile.
-   ```bash
 
 3. Switch between profiles:
    ```bash
