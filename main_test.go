@@ -78,6 +78,57 @@ func TestAdd2(t *testing.T) {
 	})
 }
 
+func TestAddProfile(t *testing.T) {
+	testDir := mkTempDir()
+	defer func() { deleteDirAndContents(testDir) }()
+
+	dirToAdd1 := mkDir(testDir, "dir1")
+	runTest(t, [][]string{
+		{"profs", "add", dirToAdd1, "--profile", "test-profile-1"},
+		{"profs", "add-profile", "test-profile-2"},
+		{"profs", "add-profile", "test-profile-3", "--copy-existing"},
+	}, func(t *testing.T, pan any, err error) {
+		checkNoFailures(t, pan, err)
+
+		// Verify that the profiles were added
+		conf := internal.LoadGlobalConf()
+		if len(conf.DetectedProfileNames()) != 3 {
+			t.Fatalf("Expected 2 profiles, got: %d", len(conf.DetectedProfileNames()))
+		}
+
+		expectedProfiles := []string{"test-profile-1", "test-profile-2", "test-profile-3"}
+		if diff := cmp.Diff(conf.DetectedProfileNames(), expectedProfiles); diff != "" {
+			t.Fatalf("Profiles mismatch (-got +want):\n%s", diff)
+		}
+	})
+}
+
+func TestRemoveProfile(t *testing.T) {
+	testDir := mkTempDir()
+	defer func() { deleteDirAndContents(testDir) }()
+
+	dirToAdd1 := mkDir(testDir, "dir1")
+	runTest(t, [][]string{
+		{"profs", "add", dirToAdd1, "--profile", "test-profile-1"},
+		{"profs", "add-profile", "test-profile-2"},
+		{"profs", "add-profile", "test-profile-3"},
+		{"profs", "remove-profile", "test-profile-2", "-y"},
+	}, func(t *testing.T, pan any, err error) {
+		checkNoFailures(t, pan, err)
+
+		// Verify that the profiles were added
+		conf := internal.LoadGlobalConf()
+		if len(conf.DetectedProfileNames()) != 2 {
+			t.Fatalf("Expected 2 profiles, got: %d", len(conf.DetectedProfileNames()))
+		}
+
+		expectedProfiles := []string{"test-profile-1", "test-profile-3"}
+		if diff := cmp.Diff(conf.DetectedProfileNames(), expectedProfiles); diff != "" {
+			t.Fatalf("Profiles mismatch (-got +want):\n%s", diff)
+		}
+	})
+}
+
 func TestList2(t *testing.T) {
 	testDir := mkTempDir()
 	defer func() { deleteDirAndContents(testDir) }()

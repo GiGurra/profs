@@ -11,7 +11,7 @@ import (
 	"strings"
 )
 
-func AddCmd(gc GlobalConfig) *cobra.Command {
+func AddCmd(cmdName string, gc GlobalConfig) *cobra.Command {
 
 	var params struct {
 		Path    string               `positional:"true" description:"Path to add"`
@@ -19,7 +19,7 @@ func AddCmd(gc GlobalConfig) *cobra.Command {
 	}
 
 	return boa.Cmd{
-		Use:         "add",
+		Use:         cmdName,
 		Short:       "Adds a new directory to be managed by profs",
 		Params:      &params,
 		ParamEnrich: paramEnricherDefault,
