@@ -82,6 +82,43 @@ Generate completion scripts:
 profs completion bash|zsh|fish|powershell
 ```
 
+## Full command reference
+
+run `profs --help` to see all available commands and options:
+
+```bash
+> profs --help
+Manage user profiles
+
+Usage:
+  profs [command]
+
+Available Commands:
+  add                Adds a new directory to be managed by profs
+  add-path           Adds a new directory to be managed by profs
+  add-profile        Adds a new profile to be managed by profs
+  completion         Generate the autocompletion script for the specified shell
+  doctor             Show inconsistencies in the current configuration
+  help               Help about any command
+  list               Lists all detected profiles
+  list-profiles      Lists all detected profiles
+  migrate-config-dir Migrate legacy /Users/johkjo/.profs -> /Users/johkjo/.config/gigurra/profs
+  remove             Removes a directory from profs config
+  remove-path        Removes a directory from profs config
+  remove-profile     Removes an existing profile managed by profs
+  reset              Resets all configuration to zero
+  set                Set current profile
+  status             Show current status
+  status-config      Show current raw configuration
+  status-full        Show full status and alternatives
+  status-profile     Show current profile status
+
+Flags:
+  -h, --help   help for profs
+
+Use "profs [command] --help" for more information about a command.
+```
+
 ## License
 
 MIT License - see [LICENSE](LICENSE) file for details.
