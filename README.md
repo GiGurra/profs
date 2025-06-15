@@ -3,10 +3,6 @@
 [![CI Status](https://github.com/GiGurra/profs/actions/workflows/ci.yml/badge.svg)](https://github.com/GiGurra/profs/actions/workflows/ci.yml)
 [![Go Report Card](https://goreportcard.com/badge/github.com/GiGurra/profs)](https://goreportcard.com/report/github.com/GiGurra/profs)
 
-A CLI tool for managing different configuration profiles by switching symlinks between profile directories.
-
-## What it does
-
 `profs` helps you manage multiple configuration profiles for different contexts (work vs personal, different clients,
 etc.) by organizing them into `.profs` companion directories and using symlinks to switch between them.
 
