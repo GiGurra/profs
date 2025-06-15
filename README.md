@@ -22,7 +22,7 @@ go install github.com/GiGurra/profs@latest
 or if you prefer a tool manager like `mise`, you can use:
 
 ```bash
-mise use "go:github.com/GiGurra/profs@latest"
+mise use -g "go:github.com/GiGurra/profs@latest"
 ```
 
 ## Quick Start
