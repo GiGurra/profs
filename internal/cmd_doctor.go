@@ -39,6 +39,7 @@ func DoctorCmd(gc GlobalConfig) *cobra.Command {
 
 			activeProfileName := activeProfileNames[0]
 
+			numWarnings := 1
 			for _, path := range gc.Paths {
 
 				fmt.Printf("Checking path: %s\n", path.SrcPath)
@@ -46,6 +47,7 @@ func DoctorCmd(gc GlobalConfig) *cobra.Command {
 				if !isSymlink(path.SrcPath) {
 					// TODO: Implement fix/repair operation
 					fmt.Printf(" * WARN * Source path %s is not a symlink, expected a symlink to a profile directory.\n", path.SrcPath)
+					numWarnings++
 					continue
 				}
 
@@ -53,9 +55,11 @@ func DoctorCmd(gc GlobalConfig) *cobra.Command {
 				if err != nil {
 					// TODO: Implement fix/repair operation
 					fmt.Printf(" * WARN * Error getting active profile for path %s: %v\n", path.SrcPath, err)
+					numWarnings++
 				} else if activeProfile != activeProfileName {
 					// TODO: Implement fix/repair operation
 					fmt.Printf(" * WARN * Active profile for path %s is '%s', expected '%s'.\n", path.SrcPath, activeProfile, activeProfileName)
+					numWarnings++
 				}
 
 				profilesForPath := lo.Map(path.DetectedProfs, func(item DetectedProfile, _ int) string {
@@ -66,10 +70,16 @@ func DoctorCmd(gc GlobalConfig) *cobra.Command {
 					// TODO: Implement fix/repair operation
 					for _, missingProfile := range missingProfiles {
 						fmt.Printf(" * WARN * Profile '%s' is missing for path %s\n", missingProfile, path.SrcPath)
+						numWarnings++
 					}
 				}
 			}
 
+			if numWarnings == 0 {
+				fmt.Println("No inconsistencies found, everything seems to be in order.")
+			} else {
+				ExitWithMsg(1, fmt.Sprintf("Found %d inconsistencies, please review the warnings above.", numWarnings))
+			}
 		},
 	}.ToCobra()
 }
