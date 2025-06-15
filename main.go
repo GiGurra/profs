@@ -23,6 +23,7 @@ func mainCmd() *boa.Cmd {
 			internal.AddCmd("add", gc),
 			internal.AddCmd("add-path", gc),
 			internal.AddProfileCmd(gc),
+			internal.DoctorCmd(gc),
 			internal.RemoveCmd("remove", gc),
 			internal.RemoveCmd("remove-path", gc),
 			internal.RemoveProfileCmd(gc),

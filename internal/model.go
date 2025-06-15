@@ -28,6 +28,17 @@ func (path *Path) ProfsDir() (string, error) {
 	}
 }
 
+func (path *Path) ActiveProfile() (string, error) {
+	if path.TgtPath == nil {
+		return "", fmt.Errorf("target path is nil for source path: %s", path.SrcPath)
+	}
+	if *path.TgtPath == "" {
+		return "", fmt.Errorf("target path is empty for source path: %s", path.SrcPath)
+	}
+	prof := filepath.Base(*path.TgtPath)
+	return prof, nil
+}
+
 type Status string
 
 const (
