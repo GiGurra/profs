@@ -39,7 +39,7 @@ func DoctorCmd(gc GlobalConfig) *cobra.Command {
 
 			activeProfileName := activeProfileNames[0]
 
-			numWarnings := 1
+			numWarnings := 0
 			for _, path := range gc.Paths {
 
 				fmt.Printf("Checking path: %s\n", path.SrcPath)
