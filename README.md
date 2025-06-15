@@ -97,6 +97,21 @@ Example structure:
 ## Configuration
 
 Configuration is stored at `~/.config/gigurra/profs/global.json` and contains the list of managed paths.
+Example:
+```bash
+> cat ~/.config/gigurra/profs/global.json
+{
+  "paths": [
+    "~/.config/gigurra/ai",
+    "~/.config/gh",
+    "~/.ssh",
+    "~/.kube",
+    "~/.gitconfig",
+    "~/.config/github-copilot",
+    "~/.config/gcloud"
+  ]
+}
+```
 
 ## Shell Completion
 
