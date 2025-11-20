@@ -3,14 +3,14 @@ module github.com/GiGurra/profs
 go 1.24.3
 
 require (
-	github.com/GiGurra/boa v0.3.16
+	github.com/GiGurra/boa v0.3.31
 	github.com/google/go-cmp v0.7.0
 	github.com/samber/lo v1.52.0
-	github.com/spf13/cobra v1.9.1
+	github.com/spf13/cobra v1.10.1
 )
 
 require (
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
-	github.com/spf13/pflag v1.0.6 // indirect
+	github.com/spf13/pflag v1.0.9 // indirect
 	golang.org/x/text v0.25.0 // indirect
 )
