@@ -5,7 +5,7 @@ go 1.24.3
 require (
 	github.com/GiGurra/boa v0.3.31
 	github.com/google/go-cmp v0.7.0
-	github.com/samber/lo v1.51.0
+	github.com/samber/lo v1.52.0
 	github.com/spf13/cobra v1.10.1
 )
 
