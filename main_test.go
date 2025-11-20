@@ -2,15 +2,16 @@ package main
 
 import (
 	"fmt"
-	"github.com/GiGurra/boa/pkg/boa"
-	"github.com/GiGurra/profs/internal"
-	"github.com/google/go-cmp/cmp"
-	"github.com/samber/lo"
 	"os"
 	"path/filepath"
 	"strings"
 	"sync"
 	"testing"
+
+	"github.com/GiGurra/boa/pkg/boa"
+	"github.com/GiGurra/profs/internal"
+	"github.com/google/go-cmp/cmp"
+	"github.com/samber/lo"
 )
 
 func TestHelp(t *testing.T) {
@@ -184,7 +185,7 @@ func TestSetNonExistingProfile(t *testing.T) {
 		{"profs", "add", dirToAdd1, "--profile", "test"},
 		{"profs", "set", "testx"},
 	}, func(t *testing.T, pan any, err error) {
-		expectPanic(t, pan, err, "Profile 'testx' not found")
+		expectError(t, pan, err, "invalid value for param 'profile': 'testx' is not in the list of allowed values: [test]")
 	})
 }
 
