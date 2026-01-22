@@ -1,0 +1,49 @@
+site_name: profs
+site_url: https://gigurra.github.io/profs/
+site_description: Manage multiple configuration profiles using symlinks
+
+repo_name: GiGurra/profs
+repo_url: https://github.com/GiGurra/profs
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - content.code.copy
+    - content.code.annotate
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.superfences
+  - pymdownx.inlinehilite
+  - admonition
+  - pymdownx.details
+  - tables
+  - toc:
+      permalink: true
+
+nav:
+  - Home: index.md
+  - Guide:
+      - Getting Started: guide/getting-started.md
+      - Managing Paths: guide/paths.md
+      - Working with Profiles: guide/profiles.md
+      - Use Cases: guide/use-cases.md
+  - Reference:
+      - Commands: reference/commands.md
+      - Configuration: reference/configuration.md
