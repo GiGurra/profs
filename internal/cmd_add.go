@@ -15,7 +15,7 @@ func AddCmd(cmdName string, gc GlobalConfig) *cobra.Command {
 
 	var params struct {
 		Path    string               `positional:"true" description:"Path to add"`
-		Profile boa.Optional[string] `short:"p" name:"profile" description:"Profile to use (defaults to active profile)"`
+		Profile string `short:"p" name:"profile" optional:"true" description:"Profile to use (defaults to active profile)"`
 	}
 
 	return boa.Cmd{
@@ -25,7 +25,7 @@ func AddCmd(cmdName string, gc GlobalConfig) *cobra.Command {
 		ParamEnrich: paramEnricherDefault,
 		RunFunc: func(cmd *cobra.Command, args []string) {
 
-			profileName := params.Profile.GetOrElse("")
+			profileName := params.Profile
 			if profileName == "" {
 				activeProfiles := gc.ActiveProfileNames()
 				switch len(activeProfiles) {

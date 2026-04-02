@@ -8,7 +8,6 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/GiGurra/boa/pkg/boa"
 	"github.com/GiGurra/profs/internal"
 	"github.com/google/go-cmp/cmp"
 	"github.com/samber/lo"
@@ -250,17 +249,17 @@ func runTest(
 	func() {
 		defer func() {
 			if r := recover(); r != nil {
-				t.Errorf("Test panicked: %v", r)
+				pan = r
 			}
+			verifier(t, pan, err)
 		}()
 		for _, args := range argSet {
 			os.Args = args
-			mainCmd().RunH(boa.ResultHandler{
-				Panic:   func(a any) { pan = a },
-				Failure: func(e error) { err = e },
-			})
+			err = mainCmd().RunE()
+			if err != nil {
+				break
+			}
 		}
-		verifier(t, pan, err)
 	}()
 }
 
